@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const puppeteer = require('puppeteer');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,9 +22,22 @@ app.post('/api/scrape', async (req, res) => {
     try {
         console.log(`[Scraper] Iniciando extração para: ${url} (max: ${maxReviews}, filter: ${ratingFilter}, onlyText: ${onlyWithText})`);
         
+        let chromePath = process.env.PUPPETEER_EXECUTABLE_PATH || null;
+
+        if (process.env.RENDER) {
+            console.log("[Scraper] Executando no Render. Tentando localizar Chrome no cache...");
+            const detectedPath = findChromeOnRender();
+            if (detectedPath) {
+                console.log(`[Scraper] Chrome detectado no cache em: ${detectedPath}`);
+                chromePath = detectedPath;
+            } else {
+                console.log("[Scraper] Chrome não detectado no cache. Tentando caminhos padrões ou env.");
+            }
+        }
+
         const launchOptions = {
             headless: "new",
-            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
+            executablePath: chromePath,
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox',
@@ -380,6 +394,33 @@ function generateLocalAiSummary(reviews) {
         summary: summaryParagraph,
         highlights: highlights.slice(0, 3)
     };
+}
+
+// Helper to find chrome binary recursively inside Render's cache directory
+function findChromeOnRender() {
+    const cacheDir = '/opt/render/.cache/puppeteer';
+    if (!fs.existsSync(cacheDir)) return null;
+
+    function search(dir) {
+        const files = fs.readdirSync(dir);
+        for (const file of files) {
+            const fullPath = path.join(dir, file);
+            const stat = fs.statSync(fullPath);
+            if (stat.isDirectory()) {
+                const found = search(fullPath);
+                if (found) return found;
+            } else if (file === 'chrome' && (dir.includes('chrome-linux') || dir.includes('chrome-linux64'))) {
+                return fullPath;
+            }
+        }
+        return null;
+    }
+    try {
+        return search(cacheDir);
+    } catch (e) {
+        console.error('[Scraper] Erro ao buscar cromo no cache:', e);
+        return null;
+    }
 }
 
 app.listen(PORT, '0.0.0.0', () => {
