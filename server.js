@@ -23,10 +23,13 @@ app.post('/api/scrape', async (req, res) => {
         
         const launchOptions = {
             headless: "new",
+            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
             args: [
-                '--lang=pt-BR,pt', 
                 '--no-sandbox', 
                 '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--single-process',
+                '--lang=pt-BR,pt', 
                 '--disable-blink-features=AutomationControlled',
                 '--enable-webgl',
                 '--use-gl=angle',
@@ -34,11 +37,7 @@ app.post('/api/scrape', async (req, res) => {
             ]
         };
 
-        if (process.env.PUPPETEER_EXECUTABLE_PATH) {
-            console.log(`[Scraper] Usando executável do Chromium em: ${process.env.PUPPETEER_EXECUTABLE_PATH}`);
-            launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
-        }
-
+        console.log(`[Scraper] Usando executável do Chromium: ${launchOptions.executablePath}`);
         browser = await puppeteer.launch(launchOptions);
 
         const page = await browser.newPage();
@@ -383,7 +382,7 @@ function generateLocalAiSummary(reviews) {
     };
 }
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor rodando na porta ${PORT}`);
     console.log(`Acesse http://localhost:${PORT}`);
 });
