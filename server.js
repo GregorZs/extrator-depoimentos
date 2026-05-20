@@ -1,8 +1,17 @@
 const express = require('express');
 const cors = require('cors');
-const puppeteer = require('puppeteer');
 const path = require('path');
 const fs = require('fs');
+
+const puppeteer = process.env.RENDER ? require('puppeteer-core') : require('puppeteer');
+let chromium;
+if (process.env.RENDER) {
+    try {
+        chromium = require('@sparticuz/chromium');
+    } catch (e) {
+        console.error('[Server] Opcional @sparticuz/chromium falhou:', e.message);
+    }
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,37 +31,34 @@ app.post('/api/scrape', async (req, res) => {
     try {
         console.log(`[Scraper] Iniciando extração para: ${url} (max: ${maxReviews}, filter: ${ratingFilter}, onlyText: ${onlyWithText})`);
         
-        let chromePath = process.env.PUPPETEER_EXECUTABLE_PATH || null;
+        let options = {};
 
         if (process.env.RENDER) {
-            console.log("[Scraper] Executando no Render. Tentando localizar Chrome no cache...");
-            const detectedPath = findChromeOnRender();
-            if (detectedPath) {
-                console.log(`[Scraper] Chrome detectado no cache em: ${detectedPath}`);
-                chromePath = detectedPath;
-            } else {
-                console.log("[Scraper] Chrome não detectado no cache. Tentando caminhos padrões ou env.");
-            }
+            options = {
+                args: chromium.args,
+                defaultViewport: chromium.defaultViewport,
+                executablePath: await chromium.executablePath(),
+                headless: chromium.headless,
+                ignoreHTTPSErrors: true,
+            };
+        } else {
+            // Local Windows configuration using bundled puppeteer chromium
+            options = {
+                headless: "new",
+                args: [
+                    '--lang=pt-BR,pt', 
+                    '--no-sandbox', 
+                    '--disable-setuid-sandbox',
+                    '--disable-blink-features=AutomationControlled',
+                    '--enable-webgl',
+                    '--use-gl=angle',
+                    '--use-angle=swiftshader'
+                ]
+            };
         }
 
-        const launchOptions = {
-            headless: "new",
-            executablePath: chromePath,
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--single-process',
-                '--lang=pt-BR,pt', 
-                '--disable-blink-features=AutomationControlled',
-                '--enable-webgl',
-                '--use-gl=angle',
-                '--use-angle=swiftshader'
-            ]
-        };
-
-        console.log(`[Scraper] Usando executável do Chromium: ${launchOptions.executablePath}`);
-        browser = await puppeteer.launch(launchOptions);
+        console.log(`[Scraper] Iniciando Puppeteer. Headless: ${options.headless}, Executable: ${options.executablePath}`);
+        browser = await puppeteer.launch(options);
 
         const page = await browser.newPage();
         await page.setViewport({ width: 1280, height: 800 });
@@ -394,33 +400,6 @@ function generateLocalAiSummary(reviews) {
         summary: summaryParagraph,
         highlights: highlights.slice(0, 3)
     };
-}
-
-// Helper to find chrome binary recursively inside Render's cache directory
-function findChromeOnRender() {
-    const cacheDir = '/opt/render/.cache/puppeteer';
-    if (!fs.existsSync(cacheDir)) return null;
-
-    function search(dir) {
-        const files = fs.readdirSync(dir);
-        for (const file of files) {
-            const fullPath = path.join(dir, file);
-            const stat = fs.statSync(fullPath);
-            if (stat.isDirectory()) {
-                const found = search(fullPath);
-                if (found) return found;
-            } else if (file === 'chrome' && (dir.includes('chrome-linux') || dir.includes('chrome-linux64'))) {
-                return fullPath;
-            }
-        }
-        return null;
-    }
-    try {
-        return search(cacheDir);
-    } catch (e) {
-        console.error('[Scraper] Erro ao buscar cromo no cache:', e);
-        return null;
-    }
 }
 
 app.listen(PORT, '0.0.0.0', () => {
