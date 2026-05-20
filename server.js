@@ -35,11 +35,21 @@ app.post('/api/scrape', async (req, res) => {
 
         if (process.env.RENDER) {
             options = {
-                args: chromium.args,
+                args: [
+                    ...chromium.args,
+                    '--lang=pt-BR,pt',
+                    '--accept-lang=pt-BR,pt'
+                ],
                 defaultViewport: chromium.defaultViewport,
                 executablePath: await chromium.executablePath(),
                 headless: chromium.headless,
                 ignoreHTTPSErrors: true,
+                env: {
+                    LANGUAGE: 'pt_BR',
+                    LANG: 'pt_BR.UTF-8',
+                    LC_ALL: 'pt_BR.UTF-8',
+                    ...process.env
+                }
             };
         } else {
             // Local Windows configuration using bundled puppeteer chromium
@@ -47,13 +57,20 @@ app.post('/api/scrape', async (req, res) => {
                 headless: "new",
                 args: [
                     '--lang=pt-BR,pt', 
+                    '--accept-lang=pt-BR,pt',
                     '--no-sandbox', 
                     '--disable-setuid-sandbox',
                     '--disable-blink-features=AutomationControlled',
                     '--enable-webgl',
                     '--use-gl=angle',
                     '--use-angle=swiftshader'
-                ]
+                ],
+                env: {
+                    LANGUAGE: 'pt_BR',
+                    LANG: 'pt_BR.UTF-8',
+                    LC_ALL: 'pt_BR.UTF-8',
+                    ...process.env
+                }
             };
         }
 
@@ -62,6 +79,17 @@ app.post('/api/scrape', async (req, res) => {
 
         const page = await browser.newPage();
         await page.setViewport({ width: 1280, height: 800 });
+        
+        // Bloqueio de carregamento de recursos não essenciais para otimizar velocidade e memória RAM
+        await page.setRequestInterception(true);
+        page.on('request', (req) => {
+            const type = req.resourceType();
+            if (['image', 'font', 'media'].includes(type)) {
+                req.abort();
+            } else {
+                req.continue();
+            }
+        });
         
         // Inject WebGL evasion spoofing
         await page.evaluateOnNewDocument(() => {
@@ -86,23 +114,32 @@ app.post('/api/scrape', async (req, res) => {
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
         await new Promise(r => setTimeout(r, 5000));
         
-        // Let's resolve the page and click the "Avaliações" tab.
+        // Let's resolve the page and click the "Avaliações" or "Reviews" tab.
         // We will try to click it on the current resolved page. If not found, we use robust search queries.
-        console.log("[Scraper] Tentando clicar na aba de Avaliações...");
+        console.log("[Scraper] Tentando clicar na aba de Avaliações/Reviews...");
         let tabClicked = await page.evaluate(() => {
             const buttons = Array.from(document.querySelectorAll('button'));
-            const tab = buttons.find(b => b.textContent.trim().toLowerCase() === 'avaliações');
+            const tab = buttons.find(b => {
+                const txt = b.textContent.trim().toLowerCase();
+                return txt === 'avaliações' || txt === 'reviews';
+            });
             if (tab) {
                 tab.click();
                 return "button";
             }
             const divs = Array.from(document.querySelectorAll('div[role="tab"]'));
-            const tabDiv = divs.find(d => d.textContent.trim().toLowerCase() === 'avaliações');
+            const tabDiv = divs.find(d => {
+                const txt = d.textContent.trim().toLowerCase();
+                return txt === 'avaliações' || txt === 'reviews';
+            });
             if (tabDiv) {
                 tabDiv.click();
                 return "div[role=tab]";
             }
-            const anyTab = Array.from(document.querySelectorAll('*')).find(el => el.textContent.trim().toLowerCase() === 'avaliações');
+            const anyTab = Array.from(document.querySelectorAll('*')).find(el => {
+                const txt = el.textContent.trim().toLowerCase();
+                return txt === 'avaliações' || txt === 'reviews';
+            });
             if (anyTab) {
                 anyTab.click();
                 return "generic";
@@ -150,18 +187,27 @@ app.post('/api/scrape', async (req, res) => {
                 
                 tabClicked = await page.evaluate(() => {
                     const buttons = Array.from(document.querySelectorAll('button'));
-                    const tab = buttons.find(b => b.textContent.trim().toLowerCase() === 'avaliações');
+                    const tab = buttons.find(b => {
+                        const txt = b.textContent.trim().toLowerCase();
+                        return txt === 'avaliações' || txt === 'reviews';
+                    });
                     if (tab) {
                         tab.click();
                         return "button";
                     }
                     const divs = Array.from(document.querySelectorAll('div[role="tab"]'));
-                    const tabDiv = divs.find(d => d.textContent.trim().toLowerCase() === 'avaliações');
+                    const tabDiv = divs.find(d => {
+                        const txt = d.textContent.trim().toLowerCase();
+                        return txt === 'avaliações' || txt === 'reviews';
+                    });
                     if (tabDiv) {
                         tabDiv.click();
                         return "div[role=tab]";
                     }
-                    const anyTab = Array.from(document.querySelectorAll('*')).find(el => el.textContent.trim().toLowerCase() === 'avaliações');
+                    const anyTab = Array.from(document.querySelectorAll('*')).find(el => {
+                        const txt = el.textContent.trim().toLowerCase();
+                        return txt === 'avaliações' || txt === 'reviews';
+                    });
                     if (anyTab) {
                         anyTab.click();
                         return "generic";
@@ -202,7 +248,7 @@ app.post('/api/scrape', async (req, res) => {
                 }
             });
             
-            await new Promise(r => setTimeout(r, 2200));
+            await new Promise(r => setTimeout(r, 3000));
             
             const currentCount = await page.evaluate(() => document.querySelectorAll('.jftiEf').length);
             console.log(`[Scraper] Rolagem ${i}: Depoimentos em tela = ${currentCount}`);
