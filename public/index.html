@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extrator Premium de Depoimentos do Google Maps</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        title: ['"Space Grotesk"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen selection:bg-brand-500 selection:text-white pb-16 overflow-x-hidden">
+    <!-- Glowing background elements -->
+    <div class="absolute top-0 left-1/4 w-[500px] h-[500px] bg-brand-500/10 blur-[120px] rounded-full pointer-events-none"></div>
+    <div class="absolute top-[20%] right-1/4 w-[600px] h-[600px] bg-indigo-500/10 blur-[150px] rounded-full pointer-events-none"></div>
+
+    <main class="relative z-10 container mx-auto px-4 pt-12 max-w-6xl">
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <div class="inline-flex items-center justify-center p-3.5 bg-slate-800/80 backdrop-blur-md rounded-2xl border border-slate-700/50 shadow-xl shadow-black/30 mb-5">
+                <i class="fa-brands fa-google text-3xl text-brand-500 mr-2.5 drop-shadow-[0_0_8px_rgba(14,165,233,0.3)]"></i>
+                <i class="fa-solid fa-star text-2.5xl text-amber-400"></i>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-white font-title mb-3 bg-gradient-to-r from-white via-slate-100 to-brand-500 bg-clip-text text-transparent">
+                Google Reviews Extractor
+            </h1>
+            <p class="text-base md:text-lg text-slate-400 max-w-xl mx-auto font-light leading-relaxed">
+                Extraia e incorpore depoimentos autênticos do Google Maps diretamente no seu site. 
+                Sem chaves de API, sem complicações.
+            </p>
+        </header>
+
+        <!-- Main Form & Configuration Card -->
+        <div class="max-w-3xl mx-auto bg-slate-800/40 backdrop-blur-xl rounded-3xl p-6 md:p-8 shadow-2xl shadow-black/40 border border-slate-700/40 mb-10 relative overflow-hidden">
+            <form id="scrapeForm" class="space-y-6">
+                <!-- Input Box -->
+                <div class="relative">
+                    <label for="mapsUrl" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">URL do Estabelecimento no Google Maps</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fa-solid fa-map-location-dot text-brand-500 text-lg"></i>
+                        </div>
+                        <input 
+                            type="url" 
+                            id="mapsUrl" 
+                            required
+                            placeholder="Cole o link de compartilhamento ou pesquisa do Maps..." 
+                            class="w-full pl-12 pr-4 py-4 bg-slate-900/60 border border-slate-700/60 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all text-slate-200 placeholder-slate-500 text-sm font-medium"
+                        >
+                    </div>
+                </div>
+
+                <!-- Collapsible Advanced Config Toggle -->
+                <button 
+                    type="button" 
+                    id="toggleConfigBtn" 
+                    class="flex items-center justify-between w-full px-4 py-3 bg-slate-800/60 hover:bg-slate-800/95 border border-slate-700/40 rounded-xl transition-all text-xs font-semibold text-slate-300 uppercase tracking-wider"
+                >
+                    <span>Configurações e Filtros Avançados</span>
+                    <i id="configChevron" class="fa-solid fa-chevron-down transition-transform duration-300"></i>
+                </button>
+
+                <!-- Advanced Config Panel -->
+                <div id="configPanel" class="hidden transition-all duration-300 overflow-hidden bg-slate-900/40 rounded-2xl border border-slate-700/30 p-5 space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <!-- Max Reviews Selection -->
+                        <div>
+                            <label for="maxReviews" class="block text-xs font-semibold text-slate-400 mb-2">Quantidade Máxima</label>
+                            <select id="maxReviews" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 font-medium focus:ring-1 focus:ring-brand-500 focus:outline-none">
+                                <option value="5">5 depoimentos</option>
+                                <option value="10" selected>10 depoimentos</option>
+                                <option value="20">20 depoimentos</option>
+                                <option value="50">50 depoimentos</option>
+                                <option value="100">100 depoimentos (máximo)</option>
+                            </select>
+                        </div>
+
+                        <!-- Rating Stars Filter -->
+                        <div>
+                            <label for="ratingFilter" class="block text-xs font-semibold text-slate-400 mb-2">Filtrar por Estrelas</label>
+                            <select id="ratingFilter" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 font-medium focus:ring-1 focus:ring-brand-500 focus:outline-none">
+                                <option value="all" selected>Todas as avaliações</option>
+                                <option value="4to5">4 e 5 Estrelas ★★★★☆ +</option>
+                                <option value="3to5">3 Estrelas ou mais ★★★☆☆ +</option>
+                                <option value="5">Somente 5 Estrelas ★★★★★</option>
+                                <option value="4">Somente 4 Estrelas ★★★★☆</option>
+                                <option value="3">Somente 3 Estrelas ★★★☆☆</option>
+                                <option value="2">Somente 2 Estrelas ★★☆☆☆</option>
+                                <option value="1">Somente 1 Estrela ★☆☆☆☆</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+                        <!-- Keywords Filter -->
+                        <div class="p-3.5 bg-slate-800/40 rounded-xl border border-slate-700/20 flex flex-col justify-center">
+                            <label for="keywordsFilter" class="block text-xs font-semibold text-slate-200">Filtro de Palavras-Chave</label>
+                            <span class="block text-[10px] text-slate-400 mb-1.5">Separe por vírgulas (ex: excelente, ótimo, recomendo)</span>
+                            <input 
+                                type="text" 
+                                id="keywordsFilter" 
+                                placeholder="Palavras para buscar nos depoimentos..." 
+                                class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 font-medium focus:ring-1 focus:ring-brand-500 focus:outline-none"
+                            >
+                        </div>
+
+                        <!-- Toggle text only reviews -->
+                        <div class="flex items-center justify-between p-3.5 bg-slate-800/40 rounded-xl border border-slate-700/20">
+                            <div>
+                                <span class="block text-xs font-semibold text-slate-200">Apenas com Texto</span>
+                                <span class="block text-[10px] text-slate-400">Excluir avaliações que contêm apenas estrelas</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="onlyWithText" class="sr-only peer">
+                                <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-500"></div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+                        <!-- Min Length Input -->
+                        <div class="flex items-center justify-between p-3.5 bg-slate-800/40 rounded-xl border border-slate-700/20">
+                            <div>
+                                <span class="block text-xs font-semibold text-slate-200">Tamanho Mínimo do Texto</span>
+                                <span class="block text-[10px] text-slate-400">Filtrar por caracteres mínimos</span>
+                            </div>
+                            <input 
+                                type="number" 
+                                id="minLength" 
+                                value="0" 
+                                min="0" 
+                                class="w-16 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-xs text-center text-slate-200 font-medium focus:ring-1 focus:ring-brand-500 focus:outline-none"
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button 
+                    type="submit" 
+                    id="submitBtn"
+                    class="w-full py-4 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-2xl shadow-xl shadow-brand-500/20 transition-all transform hover:-translate-y-0.5 flex items-center justify-center space-x-2 text-sm uppercase tracking-wider"
+                >
+                    <span id="btnText">Extrair Depoimentos</span>
+                    <i id="btnIcon" class="fa-solid fa-bolt ml-1 animate-[pulse_1s_infinite]"></i>
+                    <svg id="loadingIcon" class="animate-spin ml-2 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </button>
+            </form>
+
+            <!-- Loading Progress Status Area -->
+            <div id="statusArea" class="hidden mt-6 bg-slate-900/50 border border-slate-700/30 rounded-2xl p-4 flex items-center space-x-4 animate-[pulse_2s_infinite]">
+                <div class="flex-shrink-0 relative">
+                    <div class="w-8 h-8 rounded-full border-2 border-brand-500/20 border-t-brand-500 animate-spin"></div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <i class="fa-solid fa-gears text-[10px] text-brand-500"></i>
+                    </div>
+                </div>
+                <div class="flex-grow">
+                    <p id="statusMessage" class="text-xs font-semibold text-slate-300">
+                        Iniciando Puppeteer com WebGL Evasion Evasions...
+                    </p>
+                    <span class="block text-[10px] text-slate-500 mt-0.5">Isso pode levar de 15 a 45 segundos para simular a rolagem infinita.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Alert -->
+        <div id="errorMessage" class="hidden max-w-3xl mx-auto mb-8 bg-red-950/40 border border-red-500/40 text-red-300 px-6 py-4.5 rounded-2xl flex items-start space-x-3.5 backdrop-blur-md">
+            <i class="fa-solid fa-triangle-exclamation mt-0.5 text-lg text-red-500"></i>
+            <div>
+                <span class="block font-bold text-sm text-red-200">Falha na Extração</span>
+                <span id="errorText" class="text-xs font-medium leading-relaxed block mt-0.5">Ocorreu um erro desconhecido.</span>
+            </div>
+        </div>
+
+        <!-- Results & Code Generator Area -->
+        <div id="resultsSection" class="hidden space-y-10">
+            <!-- Results Header -->
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-800 pb-5 max-w-5xl mx-auto gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold font-title text-white flex items-center">
+                        Depoimentos Extraídos 
+                        <span id="reviewCount" class="text-xs font-semibold bg-brand-500/20 text-brand-400 px-3 py-1 rounded-full ml-3 border border-brand-500/30">0</span>
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">Veja abaixo a prévia interativa dos depoimentos raspados em tempo real.</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button id="scrollToEmbedBtn" class="text-xs font-semibold text-brand-400 bg-brand-500/10 hover:bg-brand-500/20 border border-brand-500/20 px-4.5 py-2.5 rounded-xl transition-all flex items-center">
+                        <i class="fa-solid fa-code mr-2"></i> Obter Embed & Widgets
+                    </button>
+                </div>
+            </div>
+
+            <!-- Preview Testimonial Wrapper (faithful to generated HTML) -->
+            <div id="reviewsPreviewWrapper" class="max-w-5xl mx-auto w-full">
+                <!-- Faithfully rendered widget loaded here -->
+            </div>
+
+            <!-- Spectacular Embed & Code Formats Section -->
+            <section id="embedSection" class="max-w-4xl mx-auto bg-slate-800/30 backdrop-blur-xl border border-slate-700/50 rounded-3xl shadow-2xl p-6 md:p-8 space-y-6">
+                <div class="border-b border-slate-700/40 pb-4">
+                    <h3 class="text-xl font-bold font-title text-white flex items-center">
+                        <i class="fa-solid fa-code text-brand-500 mr-2.5"></i> 
+                        Código de Incorporação (Embed)
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-1">Configure o estilo, as colunas e copie o código completo para integrar na sua landing page ou site.</p>
+                </div>
+
+                <!-- Live Embed Configurator Tool -->
+                <div class="bg-slate-900/60 border border-slate-700/30 rounded-3xl p-6 space-y-6">
+                    <!-- Configurator Header and Tab Buttons -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-3 gap-3">
+                        <h4 class="text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center">
+                            <i class="fa-solid fa-sliders text-brand-500 mr-2 text-sm"></i> Personalizar Widget
+                        </h4>
+                        
+                        <!-- Panel Category Tabs -->
+                        <div class="flex bg-slate-800/80 border border-slate-700/60 rounded-xl p-0.5 self-start sm:self-auto">
+                            <button type="button" id="btnConfigTabLayout" class="px-3.5 py-1.5 rounded-lg text-[10px] font-bold transition-all bg-brand-500 text-white shadow-md flex items-center gap-1 focus:outline-none">
+                                <i class="fa-solid fa-layer-group"></i> Layout
+                            </button>
+                            <button type="button" id="btnConfigTabDesign" class="px-3.5 py-1.5 rounded-lg text-[10px] font-bold transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1 focus:outline-none">
+                                <i class="fa-solid fa-palette"></i> Design
+                            </button>
+                            <button type="button" id="btnConfigTabContent" class="px-3.5 py-1.5 rounded-lg text-[10px] font-bold transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1 focus:outline-none">
+                                <i class="fa-solid fa-robot"></i> Conteúdo & IA
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- TAB 1: LAYOUT PANEL -->
+                    <div id="configPanelLayout" class="space-y-5 animate-[fadeIn_0.3s_ease-out]">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+                            <!-- Layout Format Toggle -->
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Formato de Exibição</label>
+                                <div class="flex bg-slate-800 border border-slate-700 rounded-xl p-0.5">
+                                    <button type="button" id="layoutGridBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all bg-brand-500 text-white shadow-md">Grid Clássico</button>
+                                    <button type="button" id="layoutSlideBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all text-slate-400 hover:text-slate-200">Slide (Carrossel)</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Slider Style Style -->
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Estilo do Carrossel</label>
+                                <select id="embedSliderStyle" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-[11px] text-slate-200 font-semibold focus:outline-none">
+                                    <option value="multi" selected>Multicard (Padrão)</option>
+                                    <option value="center">Foco Central (3D)</option>
+                                    <option value="single">Card Único (Hero)</option>
+                                </select>
+                            </div>
+
+                            <!-- Autoplay Toggle -->
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Auto-rolagem (Slides)</label>
+                                <div class="flex bg-slate-800 border border-slate-700 rounded-xl p-0.5">
+                                    <button type="button" id="autoPlayOffBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all bg-brand-500 text-white shadow-md">Desativado</button>
+                                    <button type="button" id="autoPlayOnBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all text-slate-400 hover:text-slate-200">Ativado</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-1">
+                            <!-- Columns Toggle -->
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Colunas do Grid (Computador)</label>
+                                <select id="embedCols" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-[11px] text-slate-200 font-semibold focus:outline-none">
+                                    <option value="1">1 Coluna</option>
+                                    <option value="2">2 Colunas</option>
+                                    <option value="3" selected>3 Colunas</option>
+                                </select>
+                            </div>
+
+                            <!-- Border Radius size selector -->
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Arredondamento das Bordas</label>
+                                <select id="embedBorderRadius" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-[11px] text-slate-200 font-semibold focus:outline-none">
+                                    <option value="4px">Retangular (4px)</option>
+                                    <option value="12px" selected>Suave (12px)</option>
+                                    <option value="24px">Arredondado (24px)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: DESIGN PANEL -->
+                    <div id="configPanelDesign" class="space-y-5 hidden animate-[fadeIn_0.3s_ease-out]">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+                            <!-- Theme Toggle -->
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Tema Visual</label>
+                                <div class="flex bg-slate-800 border border-slate-700 rounded-xl p-0.5">
+                                    <button type="button" id="themeLightBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all text-slate-400 hover:text-slate-200">Claro</button>
+                                    <button type="button" id="themeDarkBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all bg-brand-500 text-white shadow-md">Escuro</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Widget Background -->
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Fundo do Widget</label>
+                                <div class="flex bg-slate-800 border border-slate-700 rounded-xl p-0.5">
+                                    <button type="button" id="bgSolidBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all bg-brand-500 text-white shadow-md">Sólido</button>
+                                    <button type="button" id="bgTransBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all text-slate-400 hover:text-slate-200">Incolor (Transparente)</button>
+                                </div>
+                            </div>
+
+                            <!-- Font Size selector -->
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Tamanho dos Textos</label>
+                                <select id="embedFontSize" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-[11px] text-slate-200 font-semibold focus:outline-none">
+                                    <option value="compact">Compacto</option>
+                                    <option value="default" selected>Padrão</option>
+                                    <option value="large">Grande</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-1">
+                            <!-- Brand Accent Presets Visual Bubbles -->
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Cor de Destaque da Marca</label>
+                                <div class="flex flex-wrap items-center gap-2.5 mt-1">
+                                    <button type="button" data-color="#0ea5e9" class="color-bubble w-7 h-7 rounded-full bg-[#0ea5e9] border border-white/20 flex items-center justify-center text-white focus:outline-none transition-all hover:scale-105 active:scale-95 shadow-md" title="Celeste">
+                                        <i class="fa-solid fa-check text-[9px] pointer-events-none"></i>
+                                    </button>
+                                    <button type="button" data-color="#4285f4" class="color-bubble w-7 h-7 rounded-full bg-[#4285f4] border border-white/20 flex items-center justify-center text-white focus:outline-none transition-all hover:scale-105 active:scale-95 shadow-md" title="Azul Google">
+                                        <i class="fa-solid fa-check text-[9px] hidden pointer-events-none"></i>
+                                    </button>
+                                    <button type="button" data-color="#10b981" class="color-bubble w-7 h-7 rounded-full bg-[#10b981] border border-white/20 flex items-center justify-center text-white focus:outline-none transition-all hover:scale-105 active:scale-95 shadow-md" title="Verde Esmeralda">
+                                        <i class="fa-solid fa-check text-[9px] hidden pointer-events-none"></i>
+                                    </button>
+                                    <button type="button" data-color="#f97316" class="color-bubble w-7 h-7 rounded-full bg-[#f97316] border border-white/20 flex items-center justify-center text-white focus:outline-none transition-all hover:scale-105 active:scale-95 shadow-md" title="Laranja Coral">
+                                        <i class="fa-solid fa-check text-[9px] hidden pointer-events-none"></i>
+                                    </button>
+                                    <button type="button" data-color="#8b5cf6" class="color-bubble w-7 h-7 rounded-full bg-[#8b5cf6] border border-white/20 flex items-center justify-center text-white focus:outline-none transition-all hover:scale-105 active:scale-95 shadow-md" title="Roxo Violeta">
+                                        <i class="fa-solid fa-check text-[9px] hidden pointer-events-none"></i>
+                                    </button>
+                                    <button type="button" data-color="custom" id="colorCustomBubble" class="color-bubble w-7 h-7 rounded-full bg-gradient-to-tr from-rose-500 via-yellow-400 to-brand-500 border border-white/20 flex items-center justify-center text-white focus:outline-none transition-all hover:scale-105 active:scale-95 shadow-md" title="Customizado">
+                                        <i class="fa-solid fa-palette text-[9px] pointer-events-none"></i>
+                                    </button>
+                                    
+                                    <!-- Dynamic Color Hex Input -->
+                                    <input type="text" id="embedAccentHex" value="#0ea5e9" placeholder="#ffffff" class="w-20 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1 text-[10px] text-slate-200 font-mono font-bold focus:outline-none focus:border-brand-500 ml-1.5" />
+                                </div>
+                            </div>
+
+                            <!-- Hover Effect selector -->
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Efeito ao Passar o Mouse (Hover)</label>
+                                <select id="embedHoverEffect" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-[11px] text-slate-200 font-semibold focus:outline-none">
+                                    <option value="none">Nenhum</option>
+                                    <option value="lift" selected>Flutuar Levemente (Y)</option>
+                                    <option value="glow">Iluminação Neon Glow</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: CONTENT & AI PANEL -->
+                    <div id="configPanelContent" class="space-y-5 hidden animate-[fadeIn_0.3s_ease-out]">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
+                            <!-- AI Review Summary -->
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Resumo de IA</label>
+                                <div class="flex bg-slate-800 border border-slate-700 rounded-xl p-0.5">
+                                    <button type="button" id="aiSummaryShowBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all bg-brand-500 text-white shadow-md">Exibir Card</button>
+                                    <button type="button" id="aiSummaryHideBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all text-slate-400 hover:text-slate-200">Ocultar</button>
+                                </div>
+                            </div>
+
+                            <!-- Show Full Text toggle -->
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Exibição do Texto</label>
+                                <div class="flex bg-slate-800 border border-slate-700 rounded-xl p-0.5">
+                                    <button type="button" id="textClampBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all bg-brand-500 text-white shadow-md">Com "Ler Mais"</button>
+                                    <button type="button" id="textFullBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all text-slate-400 hover:text-slate-200">Texto Completo</button>
+                                </div>
+                            </div>
+
+                            <!-- Show Attached Photos Toggle -->
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Fotos Anexadas</label>
+                                <div class="flex bg-slate-800 border border-slate-700 rounded-xl p-0.5">
+                                    <button type="button" id="photosShowBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all bg-brand-500 text-white shadow-md">Exibir</button>
+                                    <button type="button" id="photosHideBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all text-slate-400 hover:text-slate-200">Ocultar</button>
+                                </div>
+                            </div>
+
+                            <!-- Show Google Logo toggle -->
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Selo do Google</label>
+                                <div class="flex bg-slate-800 border border-slate-700 rounded-xl p-0.5">
+                                    <button type="button" id="logoShowBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all bg-brand-500 text-white shadow-md">Exibir</button>
+                                    <button type="button" id="logoHideBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all text-slate-400 hover:text-slate-200">Ocultar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Code Tab Selection -->
+                <div class="space-y-4">
+                    <!-- Tab Buttons -->
+                    <div class="flex border-b border-slate-700/40 overflow-x-auto scrollbar-none gap-2">
+                        <button type="button" id="tabEmbedBtn" class="px-4 py-2.5 text-xs font-semibold border-b-2 border-brand-500 text-brand-400 focus:outline-none whitespace-nowrap">
+                            <i class="fa-solid fa-code mr-1.5"></i> Widget HTML/CSS
+                        </button>
+                        <button type="button" id="tabJsonBtn" class="px-4 py-2.5 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 focus:outline-none whitespace-nowrap">
+                            <i class="fa-solid fa-braces mr-1.5"></i> Dados JSON
+                        </button>
+                        <button type="button" id="tabMarkdownBtn" class="px-4 py-2.5 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 focus:outline-none whitespace-nowrap">
+                            <i class="fa-brands fa-markdown mr-1.5"></i> Markdown List
+                        </button>
+                    </div>
+
+                    <!-- Code Textarea & Copy Actions -->
+                    <div class="relative group">
+                        <pre class="bg-slate-950 border border-slate-800 rounded-2xl p-5 text-xs font-mono text-slate-300 overflow-x-auto max-h-[380px] leading-relaxed"><code id="codeArea">HTML/CSS embed code loading...</code></pre>
+                        
+                        <!-- Floating Copy Button -->
+                        <button 
+                            type="button" 
+                            id="copyCodeBtn"
+                            class="absolute top-4 right-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white px-3.5 py-2 rounded-xl transition-all text-xs font-semibold flex items-center shadow-lg"
+                        >
+                            <i class="fa-regular fa-copy mr-1.5 text-sm"></i> Copiar Código
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Lightbox Popup Modal for Review Photos -->
+    <div id="lightboxModal" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-300">
+        <button id="closeLightboxBtn" class="absolute top-6 right-6 text-white/70 hover:text-white text-3xl font-light focus:outline-none transition-colors"><i class="fa-solid fa-xmark"></i></button>
+        <button id="prevLightboxBtn" class="absolute left-6 text-white/70 hover:text-white text-3xl focus:outline-none hidden transition-colors bg-slate-850/60 p-3 rounded-full border border-slate-700/30"><i class="fa-solid fa-chevron-left"></i></button>
+        <button id="nextLightboxBtn" class="absolute right-6 text-white/70 hover:text-white text-3xl focus:outline-none hidden transition-colors bg-slate-850/60 p-3 rounded-full border border-slate-700/30"><i class="fa-solid fa-chevron-right"></i></button>
+        <div class="max-w-4xl max-h-[85vh] flex items-center justify-center">
+            <img id="lightboxImg" src="" alt="Photo Preview" class="max-w-full max-h-[80vh] rounded-xl object-contain border border-slate-800 shadow-2xl transition-all duration-300 scale-95 opacity-0">
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
