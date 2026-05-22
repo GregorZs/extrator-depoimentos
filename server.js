@@ -279,12 +279,12 @@ app.post('/api/scrape', async (req, res) => {
         console.log("[Scraper] Extraindo depoimentos estruturados...");
         let reviews = await page.evaluate(() => {
             const cards = document.querySelectorAll('.jftiEf');
-            return Array.from(cards).map(card => {
+            return Array.from(cards).map((card, cardIdx) => {
                 const nameEl = card.querySelector('.d4r55');
                 const textEl = card.querySelector('.wiI7pd');
                 const ratingEl = card.querySelector('.kvMYJc');
                 const imgEl = card.querySelector('.NBa7we') || card.querySelector('img');
-                const dateEl = card.querySelector('.rsqaAc');
+                const dateEl = card.querySelector('.rsqaWe') || card.querySelector('.rsqaAc');
                 
                 let rating = 5;
                 if (ratingEl) {
@@ -297,18 +297,47 @@ app.post('/api/scrape', async (req, res) => {
                 const reviewPhotos = Array.from(photoButtons).map(btn => {
                     const bg = window.getComputedStyle(btn).backgroundImage;
                     if (bg && bg !== 'none') {
-                        return bg.replace(/^url\(['"]?/, '').replace(/['"]?\)$/, '');
+                        let cleanUrl = bg.replace(/^url\(['"]?/, '').replace(/['"]?\)$/, '');
+                        const isGooglePhoto = /googleusercontent\.com|ggpht\.com|lh\d+\.google\.com/.test(cleanUrl);
+                        if (isGooglePhoto && cleanUrl.includes('=')) {
+                            const parts = cleanUrl.split('=');
+                            let param = parts[parts.length - 1];
+                            const segments = param.split('-');
+                            if (segments.length > 0 && (segments[0].match(/^(w|s)\d+$/) || segments[0] === 's0')) {
+                                const remaining = segments.filter(seg => {
+                                    if (seg.match(/^w\d+$/)) return false;
+                                    if (seg.match(/^h\d+$/)) return false;
+                                    if (seg === 'p' || seg === 'n') return false;
+                                    if (seg.match(/^s\d+$/)) return false;
+                                    return true;
+                                });
+                                param = ['s0', ...remaining].join('-');
+                                parts[parts.length - 1] = param;
+                                cleanUrl = parts.join('=');
+                            }
+                        }
+                        return cleanUrl;
                     }
                     return '';
                 }).filter(url => url.length > 0);
                 
+                let debugCard = null;
+                if (cardIdx === 0) {
+                    debugCard = Array.from(card.querySelectorAll('*')).map(el => ({
+                        tag: el.tagName,
+                        className: el.className,
+                        text: el.textContent.trim().slice(0, 80)
+                    }));
+                }
+
                 return {
                     name: nameEl ? nameEl.textContent.trim() : 'Usuário Anônimo',
                     text: textEl ? textEl.textContent.trim() : '',
                     rating,
                     photo: imgEl ? (imgEl.src || '') : '',
                     date: dateEl ? dateEl.textContent.trim() : '',
-                    reviewPhotos
+                    reviewPhotos,
+                    debugCard
                 };
             });
         });
