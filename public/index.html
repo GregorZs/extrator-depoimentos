@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Extrator Premium de Depoimentos do Google Maps</title>
+    <title>Google Reviews Extractor & Widget Builder Pro</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script>
         tailwind.config = {
@@ -36,276 +36,297 @@
         }
     </script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen selection:bg-brand-500 selection:text-white pb-16 overflow-x-hidden">
-    <!-- Glowing background elements -->
-    <div class="absolute top-0 left-1/4 w-[500px] h-[500px] bg-brand-500/10 blur-[120px] rounded-full pointer-events-none"></div>
-    <div class="absolute top-[20%] right-1/4 w-[600px] h-[600px] bg-indigo-500/10 blur-[150px] rounded-full pointer-events-none"></div>
+<body class="bg-[#0b0f19] text-slate-100 min-h-screen selection:bg-brand-500 selection:text-white overflow-x-hidden font-sans">
+    
+    <!-- Premium Ambient Lighting Glows -->
+    <div class="absolute top-0 left-1/4 w-[45vw] h-[45vw] bg-brand-500/5 blur-[120px] rounded-full pointer-events-none"></div>
+    <div class="absolute top-[30%] right-1/4 w-[50vw] h-[50vw] bg-indigo-500/5 blur-[150px] rounded-full pointer-events-none"></div>
 
-    <main class="relative z-10 container mx-auto px-4 pt-12 max-w-6xl">
-        <!-- Header -->
-        <header class="text-center mb-10">
-            <div class="inline-flex items-center justify-center p-3.5 bg-slate-800/80 backdrop-blur-md rounded-2xl border border-slate-700/50 shadow-xl shadow-black/30 mb-5">
-                <i class="fa-brands fa-google text-3xl text-brand-500 mr-2.5 drop-shadow-[0_0_8px_rgba(14,165,233,0.3)]"></i>
-                <i class="fa-solid fa-star text-2.5xl text-amber-400"></i>
-            </div>
-            <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-white font-title mb-3 bg-gradient-to-r from-white via-slate-100 to-brand-500 bg-clip-text text-transparent">
-                Google Reviews Extractor
-            </h1>
-            <p class="text-base md:text-lg text-slate-400 max-w-xl mx-auto font-light leading-relaxed">
-                Extraia e incorpore depoimentos autênticos do Google Maps diretamente no seu site. 
-                Sem chaves de API, sem complicações.
-            </p>
-        </header>
-
-        <!-- Main Form & Configuration Card -->
-        <div class="max-w-3xl mx-auto bg-slate-800/40 backdrop-blur-xl rounded-3xl p-6 md:p-8 shadow-2xl shadow-black/40 border border-slate-700/40 mb-10 relative overflow-hidden">
-            <form id="scrapeForm" class="space-y-6">
-                <!-- Input Box -->
-                <div class="relative">
-                    <label for="mapsUrl" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">URL do Estabelecimento no Google Maps</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <i class="fa-solid fa-map-location-dot text-brand-500 text-lg"></i>
-                        </div>
-                        <input 
-                            type="url" 
-                            id="mapsUrl" 
-                            required
-                            placeholder="Cole o link de compartilhamento ou pesquisa do Maps..." 
-                            class="w-full pl-12 pr-4 py-4 bg-slate-900/60 border border-slate-700/60 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all text-slate-200 placeholder-slate-500 text-sm font-medium"
-                        >
-                    </div>
+    <!-- Navigation Header -->
+    <nav class="border-b border-slate-800/80 bg-slate-900/40 backdrop-blur-md sticky top-0 z-40">
+        <div class="max-w-[1400px] mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="flex items-center justify-center p-2 bg-gradient-to-tr from-brand-600 to-indigo-600 rounded-xl shadow-lg shadow-brand-500/20">
+                    <i class="fa-brands fa-google text-lg text-white"></i>
                 </div>
-
-                <!-- Collapsible Advanced Config Toggle -->
+                <div>
+                    <span class="text-sm font-extrabold tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent font-title">REVIEWS EXTRACTOR</span>
+                    <span class="text-[10px] text-brand-400 font-semibold block uppercase tracking-widest leading-none">Studio Edition</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <!-- Test Data Quick Button -->
                 <button 
                     type="button" 
-                    id="toggleConfigBtn" 
-                    class="flex items-center justify-between w-full px-4 py-3 bg-slate-800/60 hover:bg-slate-800/95 border border-slate-700/40 rounded-xl transition-all text-xs font-semibold text-slate-300 uppercase tracking-wider"
+                    id="mockDataBtn" 
+                    class="text-xs font-semibold px-3 py-1.5 bg-slate-800 hover:bg-slate-700/80 text-brand-400 border border-slate-700/60 rounded-lg transition-all flex items-center gap-1.5"
+                    title="Preencher com depoimentos falsos de teste instantaneamente"
                 >
-                    <span>Configurações e Filtros Avançados</span>
-                    <i id="configChevron" class="fa-solid fa-chevron-down transition-transform duration-300"></i>
+                    <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i>
+                    <span>Dados de Teste (Rápido)</span>
                 </button>
-
-                <!-- Advanced Config Panel -->
-                <div id="configPanel" class="hidden transition-all duration-300 overflow-hidden bg-slate-900/40 rounded-2xl border border-slate-700/30 p-5 space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <!-- Max Reviews Selection -->
-                        <div>
-                            <label for="maxReviews" class="block text-xs font-semibold text-slate-400 mb-2">Quantidade Máxima</label>
-                            <select id="maxReviews" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 font-medium focus:ring-1 focus:ring-brand-500 focus:outline-none">
-                                <option value="5">5 depoimentos</option>
-                                <option value="10" selected>10 depoimentos</option>
-                                <option value="20">20 depoimentos</option>
-                                <option value="50">50 depoimentos</option>
-                                <option value="100">100 depoimentos (máximo)</option>
-                            </select>
-                        </div>
-
-                        <!-- Rating Stars Filter -->
-                        <div>
-                            <label for="ratingFilter" class="block text-xs font-semibold text-slate-400 mb-2">Filtrar por Estrelas</label>
-                            <select id="ratingFilter" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 font-medium focus:ring-1 focus:ring-brand-500 focus:outline-none">
-                                <option value="all" selected>Todas as avaliações</option>
-                                <option value="4to5">4 e 5 Estrelas ★★★★☆ +</option>
-                                <option value="3to5">3 Estrelas ou mais ★★★☆☆ +</option>
-                                <option value="5">Somente 5 Estrelas ★★★★★</option>
-                                <option value="4">Somente 4 Estrelas ★★★★☆</option>
-                                <option value="3">Somente 3 Estrelas ★★★☆☆</option>
-                                <option value="2">Somente 2 Estrelas ★★☆☆☆</option>
-                                <option value="1">Somente 1 Estrela ★☆☆☆☆</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
-                        <!-- Keywords Filter -->
-                        <div class="p-3.5 bg-slate-800/40 rounded-xl border border-slate-700/20 flex flex-col justify-center">
-                            <label for="keywordsFilter" class="block text-xs font-semibold text-slate-200">Filtro de Palavras-Chave</label>
-                            <span class="block text-[10px] text-slate-400 mb-1.5">Separe por vírgulas (ex: excelente, ótimo, recomendo)</span>
-                            <input 
-                                type="text" 
-                                id="keywordsFilter" 
-                                placeholder="Palavras para buscar nos depoimentos..." 
-                                class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 font-medium focus:ring-1 focus:ring-brand-500 focus:outline-none"
-                            >
-                        </div>
-
-                        <!-- Toggle text only reviews -->
-                        <div class="flex items-center justify-between p-3.5 bg-slate-800/40 rounded-xl border border-slate-700/20">
-                            <div>
-                                <span class="block text-xs font-semibold text-slate-200">Apenas com Texto</span>
-                                <span class="block text-[10px] text-slate-400">Excluir avaliações que contêm apenas estrelas</span>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="onlyWithText" class="sr-only peer">
-                                <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-500"></div>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
-                        <!-- Min Length Input -->
-                        <div class="flex items-center justify-between p-3.5 bg-slate-800/40 rounded-xl border border-slate-700/20">
-                            <div>
-                                <span class="block text-xs font-semibold text-slate-200">Tamanho Mínimo do Texto</span>
-                                <span class="block text-[10px] text-slate-400">Filtrar por caracteres mínimos</span>
-                            </div>
-                            <input 
-                                type="number" 
-                                id="minLength" 
-                                value="0" 
-                                min="0" 
-                                class="w-16 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-xs text-center text-slate-200 font-medium focus:ring-1 focus:ring-brand-500 focus:outline-none"
-                            >
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Submit Button -->
-                <button 
-                    type="submit" 
-                    id="submitBtn"
-                    class="w-full py-4 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-2xl shadow-xl shadow-brand-500/20 transition-all transform hover:-translate-y-0.5 flex items-center justify-center space-x-2 text-sm uppercase tracking-wider"
-                >
-                    <span id="btnText">Extrair Depoimentos</span>
-                    <i id="btnIcon" class="fa-solid fa-bolt ml-1 animate-[pulse_1s_infinite]"></i>
-                    <svg id="loadingIcon" class="animate-spin ml-2 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                </button>
-            </form>
-
-            <!-- Loading Progress Status Area -->
-            <div id="statusArea" class="hidden mt-6 bg-slate-900/50 border border-slate-700/30 rounded-2xl p-4 flex items-center space-x-4 animate-[pulse_2s_infinite]">
-                <div class="flex-shrink-0 relative">
-                    <div class="w-8 h-8 rounded-full border-2 border-brand-500/20 border-t-brand-500 animate-spin"></div>
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <i class="fa-solid fa-gears text-[10px] text-brand-500"></i>
-                    </div>
-                </div>
-                <div class="flex-grow">
-                    <p id="statusMessage" class="text-xs font-semibold text-slate-300">
-                        Iniciando Puppeteer com WebGL Evasion Evasions...
-                    </p>
-                    <span class="block text-[10px] text-slate-500 mt-0.5">Isso pode levar de 15 a 45 segundos para simular a rolagem infinita.</span>
-                </div>
+                
+                <a href="#resultsSection" class="text-xs font-semibold text-slate-400 hover:text-slate-200 transition-colors">Prévia</a>
+                <a href="#embedSection" class="text-xs font-semibold text-slate-400 hover:text-slate-200 transition-colors">Widget Code</a>
             </div>
         </div>
+    </nav>
 
-        <!-- Error Alert -->
-        <div id="errorMessage" class="hidden max-w-3xl mx-auto mb-8 bg-red-950/40 border border-red-500/40 text-red-300 px-6 py-4.5 rounded-2xl flex items-start space-x-3.5 backdrop-blur-md">
-            <i class="fa-solid fa-triangle-exclamation mt-0.5 text-lg text-red-500"></i>
+    <main class="max-w-[1400px] mx-auto px-4 py-6">
+        
+        <!-- Welcome Hero Info -->
+        <header class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 bg-gradient-to-r from-slate-900/70 to-slate-800/20 border border-slate-800/60 rounded-2xl">
             <div>
-                <span class="block font-bold text-sm text-red-200">Falha na Extração</span>
-                <span id="errorText" class="text-xs font-medium leading-relaxed block mt-0.5">Ocorreu um erro desconhecido.</span>
+                <h1 class="text-xl md:text-2xl font-bold tracking-tight text-white font-title flex items-center gap-2">
+                    <span class="bg-gradient-to-r from-brand-400 to-indigo-400 bg-clip-text text-transparent">Extrator & Widget Builder de Depoimentos</span>
+                    <span class="text-[10px] font-bold bg-brand-500/10 text-brand-400 px-2 py-0.5 rounded border border-brand-500/20 uppercase">v2.0</span>
+                </h1>
+                <p class="text-xs text-slate-400 mt-1 max-w-xl">
+                    Extraia, filtre e personalize depoimentos autênticos do Google Maps diretamente para o seu site. 
+                    Organize, ordene e configure o design sem precisar escrever código.
+                </p>
             </div>
-        </div>
+            
+            <!-- Quick Help Box -->
+            <div class="flex items-center space-x-3 text-xs bg-slate-900/40 p-2.5 rounded-xl border border-slate-800 self-start md:self-auto">
+                <i class="fa-solid fa-circle-info text-brand-400 text-sm"></i>
+                <span class="text-slate-400 font-medium leading-normal">
+                    Não tem URL? Clique em <button type="button" class="text-brand-400 hover:underline inline-block font-semibold" onclick="document.getElementById('mockDataBtn').click();">Dados de Teste</button> para ver o Widget Builder funcionar na hora.
+                </span>
+            </div>
+        </header>
 
-        <!-- Results & Code Generator Area -->
-        <div id="resultsSection" class="hidden space-y-10">
-            <!-- Results Header -->
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-800 pb-5 max-w-5xl mx-auto gap-4">
-                <div>
-                    <h2 class="text-2xl font-bold font-title text-white flex items-center">
-                        Depoimentos Extraídos 
-                        <span id="reviewCount" class="text-xs font-semibold bg-brand-500/20 text-brand-400 px-3 py-1 rounded-full ml-3 border border-brand-500/30">0</span>
+        <!-- Dynamic Studio Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- LEFT COLUMN: CONTROLS & WIDGET BUILDER (5 cols) -->
+            <div class="lg:col-span-4 space-y-6">
+                
+                <!-- 1. Scraping / Source Card -->
+                <div class="bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-2xl p-5 shadow-xl">
+                    <h2 class="text-xs font-bold text-slate-300 uppercase tracking-widest mb-4 flex items-center gap-2 border-b border-slate-800 pb-2">
+                        <i class="fa-solid fa-cloud-arrow-down text-brand-400"></i>
+                        <span>1. Origem dos Depoimentos</span>
                     </h2>
-                    <p class="text-xs text-slate-400 mt-1">Veja abaixo a prévia interativa dos depoimentos raspados em tempo real.</p>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <button id="scrollToEmbedBtn" class="text-xs font-semibold text-brand-400 bg-brand-500/10 hover:bg-brand-500/20 border border-brand-500/20 px-4.5 py-2.5 rounded-xl transition-all flex items-center">
-                        <i class="fa-solid fa-code mr-2"></i> Obter Embed & Widgets
-                    </button>
-                </div>
-            </div>
+                    
+                    <form id="scrapeForm" class="space-y-4">
+                        <!-- URL Input -->
+                        <div>
+                            <label for="mapsUrl" class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">URL do Google Maps</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fa-solid fa-map-pin text-brand-500 text-xs"></i>
+                                </div>
+                                <input 
+                                    type="url" 
+                                    id="mapsUrl" 
+                                    required
+                                    placeholder="Cole a URL do estabelecimento no Google Maps..." 
+                                    class="w-full pl-8 pr-3 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all text-xs text-slate-200 placeholder-slate-600"
+                                >
+                            </div>
+                        </div>
 
-            <!-- Preview Testimonial Wrapper (faithful to generated HTML) -->
-            <div id="reviewsPreviewWrapper" class="max-w-5xl mx-auto w-full">
-                <!-- Faithfully rendered widget loaded here -->
-            </div>
+                        <!-- Scraper Settings Toggle -->
+                        <div class="border-t border-slate-800/60 pt-3">
+                            <button 
+                                type="button" 
+                                id="toggleScraperConfigBtn" 
+                                class="flex items-center justify-between w-full text-[10px] font-bold text-slate-400 uppercase tracking-wider hover:text-slate-200 transition-colors"
+                            >
+                                <span>Filtros do Servidor (Scraper)</span>
+                                <i id="scraperChevron" class="fa-solid fa-chevron-down transition-transform duration-300"></i>
+                            </button>
 
-            <!-- Spectacular Embed & Code Formats Section -->
-            <section id="embedSection" class="max-w-4xl mx-auto bg-slate-800/30 backdrop-blur-xl border border-slate-700/50 rounded-3xl shadow-2xl p-6 md:p-8 space-y-6">
-                <div class="border-b border-slate-700/40 pb-4">
-                    <h3 class="text-xl font-bold font-title text-white flex items-center">
-                        <i class="fa-solid fa-code text-brand-500 mr-2.5"></i> 
-                        Código de Incorporação (Embed)
-                    </h3>
-                    <p class="text-xs text-slate-400 mt-1">Configure o estilo, as colunas e copie o código completo para integrar na sua landing page ou site.</p>
-                </div>
+                            <!-- Scraper Advanced Options -->
+                            <div id="scraperConfigPanel" class="hidden mt-3 space-y-3 bg-slate-950/30 p-3 rounded-xl border border-slate-800/40">
+                                
+                                <!-- Max Reviews Selector -->
+                                <div>
+                                    <label for="maxReviews" class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Quantidade de Scrape</label>
+                                    <select id="maxReviews" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-300 font-medium focus:ring-1 focus:ring-brand-500 focus:outline-none">
+                                        <option value="5">5 depoimentos</option>
+                                        <option value="10" selected>10 depoimentos</option>
+                                        <option value="20">20 depoimentos</option>
+                                        <option value="40">40 depoimentos</option>
+                                        <option value="70">70 depoimentos (máximo)</option>
+                                    </select>
+                                    <span class="text-[9px] text-slate-500 mt-1 block">A raspagem simula a rolagem física no Google Maps.</span>
+                                </div>
 
-                <!-- Live Embed Configurator Tool -->
-                <div class="bg-slate-900/60 border border-slate-700/30 rounded-3xl p-6 space-y-6">
-                    <!-- Configurator Header and Tab Buttons -->
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-3 gap-3">
-                        <h4 class="text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center">
-                            <i class="fa-solid fa-sliders text-brand-500 mr-2 text-sm"></i> Personalizar Widget
-                        </h4>
-                        
-                        <!-- Panel Category Tabs -->
-                        <div class="flex bg-slate-800/80 border border-slate-700/60 rounded-xl p-0.5 self-start sm:self-auto">
-                            <button type="button" id="btnConfigTabLayout" class="px-3.5 py-1.5 rounded-lg text-[10px] font-bold transition-all bg-brand-500 text-white shadow-md flex items-center gap-1 focus:outline-none">
-                                <i class="fa-solid fa-layer-group"></i> Layout
-                            </button>
-                            <button type="button" id="btnConfigTabDesign" class="px-3.5 py-1.5 rounded-lg text-[10px] font-bold transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1 focus:outline-none">
-                                <i class="fa-solid fa-palette"></i> Design
-                            </button>
-                            <button type="button" id="btnConfigTabContent" class="px-3.5 py-1.5 rounded-lg text-[10px] font-bold transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1 focus:outline-none">
-                                <i class="fa-solid fa-robot"></i> Conteúdo & IA
-                            </button>
+                                <!-- Rating Selection Dropdown -->
+                                <div>
+                                    <label for="ratingFilter" class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Filtrar por Estrelas</label>
+                                    <select id="ratingFilter" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-300 font-medium focus:ring-1 focus:ring-brand-500 focus:outline-none">
+                                        <option value="all" selected>Todas as notas</option>
+                                        <option value="4to5">4 e 5 Estrelas ★★★★☆ +</option>
+                                        <option value="3to5">3 Estrelas ou mais ★★★☆☆ +</option>
+                                        <option value="5">Apenas 5 Estrelas ★★★★★</option>
+                                        <option value="4">Apenas 4 Estrelas ★★★★☆</option>
+                                    </select>
+                                </div>
+
+                                <!-- Text constraints -->
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label for="minLength" class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Caracteres Mínimos</label>
+                                        <input 
+                                            type="number" 
+                                            id="minLength" 
+                                            value="0" 
+                                            min="0" 
+                                            class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-xs text-slate-300 focus:ring-1 focus:ring-brand-500 focus:outline-none"
+                                        >
+                                    </div>
+                                    <div class="flex items-center justify-between pt-4">
+                                        <span class="text-[9px] font-bold text-slate-500 uppercase">Apenas c/ Texto</span>
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" id="onlyWithText" class="sr-only peer">
+                                            <div class="w-7 h-4 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-500"></div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Keywords filter -->
+                                <div>
+                                    <label for="keywordsFilter" class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Palavras-Chave de Busca</label>
+                                    <input 
+                                        type="text" 
+                                        id="keywordsFilter" 
+                                        placeholder="Ex: excelente, comida, rápido (separe por vírgulas)" 
+                                        class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-300 focus:ring-1 focus:ring-brand-500 focus:outline-none"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scrape Button -->
+                        <button 
+                            type="submit" 
+                            id="submitBtn"
+                            class="w-full py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl shadow-lg shadow-brand-500/10 hover:shadow-brand-500/20 transition-all flex items-center justify-center space-x-2 text-xs uppercase tracking-wider"
+                        >
+                            <span id="btnText">Extrair do Google</span>
+                            <i id="btnIcon" class="fa-solid fa-bolt ml-1"></i>
+                            <svg id="loadingIcon" class="animate-spin ml-2 h-4 w-4 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </button>
+                    </form>
+
+                    <!-- Realtime Logs area -->
+                    <div id="statusArea" class="hidden mt-3 bg-slate-950 border border-slate-800/80 rounded-xl p-3 flex items-center space-x-3">
+                        <div class="relative flex-shrink-0">
+                            <div class="w-6 h-6 rounded-full border border-brand-500/20 border-t-brand-500 animate-spin"></div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <i class="fa-solid fa-gears text-[8px] text-brand-500"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow">
+                            <p id="statusMessage" class="text-[10px] font-bold text-slate-300">
+                                Simulando WebGL evasions...
+                            </p>
+                            <span class="block text-[8px] text-slate-500">Isso pode levar de 15 a 45 segundos para vencer barreiras de captcha.</span>
                         </div>
                     </div>
+                </div>
+
+                <!-- 2. Interactive Widget Customizer Studio -->
+                <div class="bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-2xl p-5 shadow-xl relative overflow-hidden">
+                    <h2 class="text-xs font-bold text-slate-300 uppercase tracking-widest mb-4 flex items-center gap-2 border-b border-slate-800 pb-2">
+                        <i class="fa-solid fa-sliders text-brand-400"></i>
+                        <span>2. Estilizar & Customizar Widget</span>
+                    </h2>
+
+                    <!-- Configurator Category Tab Selectors -->
+                    <div class="flex bg-slate-950/80 border border-slate-800 rounded-lg p-0.5 mb-4">
+                        <button type="button" id="tabLayoutBtn" class="flex-1 text-[9px] font-bold py-1.5 rounded-md transition-all bg-brand-500 text-white shadow-sm flex items-center justify-center gap-1 focus:outline-none">
+                            <i class="fa-solid fa-layer-group"></i> Layout
+                        </button>
+                        <button type="button" id="tabDesignBtn" class="flex-1 text-[9px] font-bold py-1.5 rounded-md transition-all text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1 focus:outline-none">
+                            <i class="fa-solid fa-palette"></i> Design
+                        </button>
+                        <button type="button" id="tabElementsBtn" class="flex-1 text-[9px] font-bold py-1.5 rounded-md transition-all text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1 focus:outline-none">
+                            <i class="fa-solid fa-toggle-on"></i> Elementos
+                        </button>
+                        <button type="button" id="tabManualBtn" class="flex-1 text-[9px] font-bold py-1.5 rounded-md transition-all text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1 focus:outline-none">
+                            <i class="fa-solid fa-circle-plus"></i> Manual
+                        </button>
+                    </div>
+
+                    <!-- BUILDER CONTAINER SECTIONS -->
                     
-                    <!-- TAB 1: LAYOUT PANEL -->
-                    <div id="configPanelLayout" class="space-y-5 animate-[fadeIn_0.3s_ease-out]">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-                            <!-- Layout Format Toggle -->
+                    <!-- SECTION A: LAYOUT PANEL -->
+                    <div id="panelLayout" class="space-y-4">
+                        <!-- Template Presets -->
+                        <div>
+                            <label for="widgetTemplate" class="block text-[9px] font-bold text-slate-400 uppercase mb-1.5">Template Layout</label>
+                            <select id="widgetTemplate" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-300 font-semibold focus:outline-none focus:border-brand-500">
+                                <option value="grid" selected>Classic Grid (Grade)</option>
+                                <option value="slide">Modern Carousel (Slider)</option>
+                                <option value="masonry">Elegant Masonry (Mural)</option>
+                                <option value="list">Minimalist List (Lista)</option>
+                                <option value="badge">Review Badge (Selo Médio)</option>
+                                <option value="floating">Floating Badge (Selo Flutuante)</option>
+                            </select>
+                        </div>
+
+                        <!-- Grid Columns (Active only if Grid/Masonry is on) -->
+                        <div id="ctrlCols">
+                            <label for="embedCols" class="block text-[9px] font-bold text-slate-400 uppercase mb-1.5">Colunas (Grid/Masonry)</label>
+                            <select id="embedCols" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-300 font-semibold focus:outline-none">
+                                <option value="1">1 Coluna</option>
+                                <option value="2">2 Colunas</option>
+                                <option value="3" selected>3 Colunas</option>
+                                <option value="4">4 Colunas</option>
+                            </select>
+                        </div>
+
+                        <!-- Carousel Specific Controls -->
+                        <div id="ctrlCarousel" class="hidden bg-slate-950/40 p-3 rounded-xl border border-slate-800/40 space-y-3">
                             <div>
-                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Formato de Exibição</label>
-                                <div class="flex bg-slate-800 border border-slate-700 rounded-xl p-0.5">
-                                    <button type="button" id="layoutGridBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all bg-brand-500 text-white shadow-md">Grid Clássico</button>
-                                    <button type="button" id="layoutSlideBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all text-slate-400 hover:text-slate-200">Slide (Carrossel)</button>
-                                </div>
-                            </div>
-                            
-                            <!-- Slider Style Style -->
-                            <div>
-                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Estilo do Carrossel</label>
-                                <select id="embedSliderStyle" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-[11px] text-slate-200 font-semibold focus:outline-none">
+                                <label for="embedSliderStyle" class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Estilo do Slide</label>
+                                <select id="embedSliderStyle" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs text-slate-300 focus:outline-none">
                                     <option value="multi" selected>Multicard (Padrão)</option>
-                                    <option value="center">Foco Central (3D)</option>
-                                    <option value="single">Card Único (Hero)</option>
+                                    <option value="center">Foco Central (Coverflow 3D)</option>
+                                    <option value="single">Card Único (Destaque Hero)</option>
                                 </select>
                             </div>
-
-                            <!-- Autoplay Toggle -->
-                            <div>
-                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Auto-rolagem (Slides)</label>
-                                <div class="flex bg-slate-800 border border-slate-700 rounded-xl p-0.5">
-                                    <button type="button" id="autoPlayOffBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all bg-brand-500 text-white shadow-md">Desativado</button>
-                                    <button type="button" id="autoPlayOnBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all text-slate-400 hover:text-slate-200">Ativado</button>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Auto-rolagem</label>
+                                    <div class="flex bg-slate-900 border border-slate-800 rounded-lg p-0.5">
+                                        <button type="button" id="autoPlayOffBtn" class="flex-1 text-[9px] font-bold py-1 rounded bg-brand-500 text-white">Desligado</button>
+                                        <button type="button" id="autoPlayOnBtn" class="flex-1 text-[9px] font-bold py-1 text-slate-400">Ligado</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="autoPlaySpeed" class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Velocidade</label>
+                                    <select id="autoPlaySpeed" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs text-slate-300 focus:outline-none">
+                                        <option value="3000">3 segundos</option>
+                                        <option value="5000" selected>5 segundos</option>
+                                        <option value="8000">8 segundos</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-1">
-                            <!-- Columns Toggle -->
+                        <!-- Gap and padding controls -->
+                        <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Colunas do Grid (Computador)</label>
-                                <select id="embedCols" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-[11px] text-slate-200 font-semibold focus:outline-none">
-                                    <option value="1">1 Coluna</option>
-                                    <option value="2">2 Colunas</option>
-                                    <option value="3" selected>3 Colunas</option>
+                                <label for="embedGap" class="block text-[9px] font-bold text-slate-400 uppercase mb-1.5">Espaçamento (Gap)</label>
+                                <select id="embedGap" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-300 font-semibold focus:outline-none">
+                                    <option value="12px">Pequeno (12px)</option>
+                                    <option value="20px" selected>Médio (20px)</option>
+                                    <option value="28px">Grande (28px)</option>
                                 </select>
                             </div>
-
-                            <!-- Border Radius size selector -->
                             <div>
-                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Arredondamento das Bordas</label>
-                                <select id="embedBorderRadius" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-[11px] text-slate-200 font-semibold focus:outline-none">
-                                    <option value="4px">Retangular (4px)</option>
+                                <label for="embedBorderRadius" class="block text-[9px] font-bold text-slate-400 uppercase mb-1.5">Arredondamento</label>
+                                <select id="embedBorderRadius" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-300 font-semibold focus:outline-none">
+                                    <option value="0px">Reto (0px)</option>
+                                    <option value="6px">Leve (6px)</option>
                                     <option value="12px" selected>Suave (12px)</option>
                                     <option value="24px">Arredondado (24px)</option>
                                 </select>
@@ -313,164 +334,621 @@
                         </div>
                     </div>
 
-                    <!-- TAB 2: DESIGN PANEL -->
-                    <div id="configPanelDesign" class="space-y-5 hidden animate-[fadeIn_0.3s_ease-out]">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-                            <!-- Theme Toggle -->
+                    <!-- SECTION B: DESIGN PANEL (Hidden by default) -->
+                    <div id="panelDesign" class="space-y-4 hidden">
+                        <!-- Theme and background Solid/Transparent -->
+                        <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Tema Visual</label>
-                                <div class="flex bg-slate-800 border border-slate-700 rounded-xl p-0.5">
-                                    <button type="button" id="themeLightBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all text-slate-400 hover:text-slate-200">Claro</button>
-                                    <button type="button" id="themeDarkBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all bg-brand-500 text-white shadow-md">Escuro</button>
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1.5">Tema Geral</label>
+                                <div class="flex bg-slate-950 border border-slate-800 rounded-lg p-0.5">
+                                    <button type="button" id="themeLightBtn" class="flex-1 text-[9px] font-bold py-1 rounded text-slate-400">Claro</button>
+                                    <button type="button" id="themeDarkBtn" class="flex-1 text-[9px] font-bold py-1 rounded bg-brand-500 text-white">Escuro</button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1.5">Fundo do Widget</label>
+                                <div class="flex bg-slate-950 border border-slate-800 rounded-lg p-0.5">
+                                    <button type="button" id="bgSolidBtn" class="flex-1 text-[9px] font-bold py-1 rounded bg-brand-500 text-white">Sólido</button>
+                                    <button type="button" id="bgTransBtn" class="flex-1 text-[9px] font-bold py-1 rounded text-slate-400">Incolor</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Brand color picking -->
+                        <div>
+                            <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1.5">Cor de Destaque (Accent)</label>
+                            <div class="flex items-center space-x-2">
+                                <input type="color" id="accentColorPicker" value="#0ea5e9" class="w-7 h-7 bg-transparent border-0 rounded cursor-pointer">
+                                <input type="text" id="embedAccentHex" value="#0ea5e9" placeholder="#0ea5e9" class="bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs text-slate-200 font-mono font-bold w-24 focus:outline-none">
+                                
+                                <!-- Mini Color Bubbles Presets -->
+                                <div class="flex items-center gap-1.5 ml-auto">
+                                    <button type="button" class="accent-preset w-4 h-4 rounded-full bg-[#0ea5e9]" data-color="#0ea5e9"></button>
+                                    <button type="button" class="accent-preset w-4 h-4 rounded-full bg-[#4285f4]" data-color="#4285f4"></button>
+                                    <button type="button" class="accent-preset w-4 h-4 rounded-full bg-[#10b981]" data-color="#10b981"></button>
+                                    <button type="button" class="accent-preset w-4 h-4 rounded-full bg-[#f59e0b]" data-color="#f59e0b"></button>
+                                    <button type="button" class="accent-preset w-4 h-4 rounded-full bg-[#ec4899]" data-color="#ec4899"></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Typography Selection -->
+                        <div>
+                            <label for="embedFontFamily" class="block text-[9px] font-bold text-slate-400 uppercase mb-1.5">Fonte da Letra (Família)</label>
+                            <select id="embedFontFamily" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-300 font-semibold focus:outline-none">
+                                <option value="'Plus Jakarta Sans', sans-serif" selected>Plus Jakarta Sans (Padrão)</option>
+                                <option value="'Inter', sans-serif">Inter (SaaS Clean)</option>
+                                <option value="'Montserrat', sans-serif">Montserrat (Geometric)</option>
+                                <option value="'Roboto', sans-serif">Roboto (Clássica)</option>
+                                <option value="'Playfair Display', serif">Playfair Display (Editorial)</option>
+                            </select>
+                        </div>
+
+                        <!-- Font Sizes -->
+                        <div>
+                            <label for="embedFontSize" class="block text-[9px] font-bold text-slate-400 uppercase mb-1.5">Tamanho de Fonte</label>
+                            <select id="embedFontSize" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-300 font-semibold focus:outline-none">
+                                <option value="compact">Compacto (Menor)</option>
+                                <option value="default" selected>Padrão (Intermediário)</option>
+                                <option value="large">Grande (Legível)</option>
+                            </select>
+                        </div>
+
+                        <!-- Shadows and Border Style -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label for="embedHoverEffect" class="block text-[9px] font-bold text-slate-400 uppercase mb-1.5">Efeito Hover</label>
+                                <select id="embedHoverEffect" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-300 font-semibold focus:outline-none">
+                                    <option value="none">Nenhum</option>
+                                    <option value="lift" selected>Flutuar Leve</option>
+                                    <option value="glow">Brilho Neon</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="embedShadowStyle" class="block text-[9px] font-bold text-slate-400 uppercase mb-1.5">Sombra Cards</label>
+                                <select id="embedShadowStyle" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-300 font-semibold focus:outline-none">
+                                    <option value="none">Sem Sombra</option>
+                                    <option value="soft" selected>Suave (Padrão)</option>
+                                    <option value="intense">Intensa</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Text Length and Expanders -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label for="embedTextLimit" class="block text-[9px] font-bold text-slate-400 uppercase mb-1.5">Exibição do Texto</label>
+                                <select id="embedTextLimit" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-300 font-semibold focus:outline-none">
+                                    <option value="clamp" selected>Com "Ler Mais"</option>
+                                    <option value="full">Texto Completo</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="embedTextLengthLimit" class="block text-[9px] font-bold text-slate-400 uppercase mb-1.5">Limite de Corte</label>
+                                <select id="embedTextLengthLimit" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-300 font-semibold focus:outline-none">
+                                    <option value="120">120 caracts</option>
+                                    <option value="180" selected>180 caracts</option>
+                                    <option value="300">300 caracts</option>
+                                    <option value="500">500 caracts</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION C: ELEMENTS TOGGLES -->
+                    <div id="panelElements" class="space-y-3.5 hidden">
+                        <!-- Header AI Summary Toggle -->
+                        <div class="flex items-center justify-between p-2.5 bg-slate-950/40 rounded-xl border border-slate-800/40">
+                            <div>
+                                <span class="block text-[11px] font-bold text-slate-200">Resumo de IA</span>
+                                <span class="block text-[8px] text-slate-500">Análise de sentimentos geral</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="elementAiSummaryToggle" checked class="sr-only peer">
+                                <div class="w-7 h-4 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-500"></div>
+                            </label>
+                        </div>
+
+                        <!-- Hide Avatars toggle -->
+                        <div class="flex items-center justify-between p-2.5 bg-slate-950/40 rounded-xl border border-slate-800/40">
+                            <div>
+                                <span class="block text-[11px] font-bold text-slate-200">Avatares de Usuário</span>
+                                <span class="block text-[8px] text-slate-500">Exibir foto do autor da avaliação</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="elementAvatarsToggle" checked class="sr-only peer">
+                                <div class="w-7 h-4 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-500"></div>
+                            </label>
+                        </div>
+
+                        <!-- Date showing toggle -->
+                        <div class="flex items-center justify-between p-2.5 bg-slate-950/40 rounded-xl border border-slate-800/40">
+                            <div>
+                                <span class="block text-[11px] font-bold text-slate-200">Datas de Postagem</span>
+                                <span class="block text-[8px] text-slate-500">Mostrar há quanto tempo foi avaliado</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="elementDatesToggle" checked class="sr-only peer">
+                                <div class="w-7 h-4 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-500"></div>
+                            </label>
+                        </div>
+
+                        <!-- Review Photos Toggle -->
+                        <div class="flex items-center justify-between p-2.5 bg-slate-950/40 rounded-xl border border-slate-800/40">
+                            <div>
+                                <span class="block text-[11px] font-bold text-slate-200">Fotos do Depoimento</span>
+                                <span class="block text-[8px] text-slate-500">Mostrar anexos carregados por clientes</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="elementPhotosToggle" checked class="sr-only peer">
+                                <div class="w-7 h-4 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-500"></div>
+                            </label>
+                        </div>
+
+                        <!-- Google watermark badge toggle -->
+                        <div class="flex items-center justify-between p-2.5 bg-slate-950/40 rounded-xl border border-slate-800/40">
+                            <div>
+                                <span class="block text-[11px] font-bold text-slate-200">Selo Oficial do Google</span>
+                                <span class="block text-[8px] text-slate-500">Ícone flutuante do Google no card</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="elementGoogleLogoToggle" checked class="sr-only peer">
+                                <div class="w-7 h-4 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-500"></div>
+                            </label>
+                        </div>
+
+                        <!-- Separator -->
+                        <div class="border-t border-slate-800/60 my-3 pt-3">
+                            <span class="block text-[9px] font-bold text-slate-500 uppercase mb-2">Opções do Cabeçalho (Header)</span>
+                        </div>
+
+                        <!-- Show Header toggle -->
+                        <div class="flex items-center justify-between p-2.5 bg-slate-950/40 rounded-xl border border-slate-800/40">
+                            <div>
+                                <span class="block text-[11px] font-bold text-slate-200">Exibir Cabeçalho</span>
+                                <span class="block text-[8px] text-slate-500">Mostrar bloco de introdução</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="elementHeaderToggle" checked class="sr-only peer">
+                                <div class="w-7 h-4 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-500"></div>
+                            </label>
+                        </div>
+
+                        <!-- Header Title -->
+                        <div class="space-y-1">
+                            <label for="headerTitleInput" class="block text-[9px] font-bold text-slate-500 uppercase">Título do Widget</label>
+                            <input 
+                                type="text" 
+                                id="headerTitleInput" 
+                                value="O que nossos clientes dizem" 
+                                class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 focus:ring-1 focus:ring-brand-500 focus:outline-none"
+                            >
+                        </div>
+
+                        <!-- Show Rating Avg toggle -->
+                        <div class="flex items-center justify-between p-2.5 bg-slate-950/40 rounded-xl border border-slate-800/40">
+                            <div>
+                                <span class="block text-[11px] font-bold text-slate-200">Exibir Nota Média</span>
+                                <span class="block text-[8px] text-slate-500">Mostrar estrelas e média geral</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="elementHeaderRatingToggle" checked class="sr-only peer">
+                                <div class="w-7 h-4 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-500"></div>
+                            </label>
+                        </div>
+
+                        <!-- Show "Write a Review" button toggle -->
+                        <div class="flex items-center justify-between p-2.5 bg-slate-950/40 rounded-xl border border-slate-800/40">
+                            <div>
+                                <span class="block text-[11px] font-bold text-slate-200">Botão "Avaliar"</span>
+                                <span class="block text-[8px] text-slate-500">Adicionar botão para o Google Maps</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="elementHeaderButtonToggle" checked class="sr-only peer">
+                                <div class="w-7 h-4 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-500"></div>
+                            </label>
+                        </div>
+
+                        <!-- Header Button Google Review Link URL -->
+                        <div class="space-y-1">
+                            <label for="headerReviewUrlInput" class="block text-[9px] font-bold text-slate-500 uppercase">URL para Avaliar (Google Maps)</label>
+                            <input 
+                                type="url" 
+                                id="headerReviewUrlInput" 
+                                placeholder="https://g.page/r/.../review" 
+                                class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 focus:ring-1 focus:ring-brand-500 focus:outline-none"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- SECTION D: MANUAL TESTIMONIAL PANEL -->
+                    <div id="panelManual" class="space-y-4 hidden">
+                        <span class="block text-[10px] font-bold text-slate-400 uppercase border-b border-slate-800 pb-1.5 mb-2"><i class="fa-solid fa-circle-plus text-emerald-500 mr-1"></i> Criar Depoimento Manual</span>
+                        
+                        <form id="manualReviewForm" class="space-y-3">
+                            <div>
+                                <label for="manualReviewName" class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Nome do Cliente</label>
+                                <input 
+                                    type="text" 
+                                    id="manualReviewName" 
+                                    required
+                                    placeholder="Ex: Ana Maria Souza" 
+                                    class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-brand-500"
+                                >
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label for="manualReviewRating" class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Nota (Estrelas)</label>
+                                    <select id="manualReviewRating" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-200 focus:outline-none">
+                                        <option value="5" selected>5 Estrelas</option>
+                                        <option value="4">4 Estrelas</option>
+                                        <option value="3">3 Estrelas</option>
+                                        <option value="2">2 Estrelas</option>
+                                        <option value="1">1 Estrela</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="manualReviewDate" class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Data / Tempo</label>
+                                    <input 
+                                        type="text" 
+                                        id="manualReviewDate" 
+                                        placeholder="Ex: hoje, há 2 semanas" 
+                                        class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-brand-500"
+                                    >
                                 </div>
                             </div>
                             
-                            <!-- Widget Background -->
                             <div>
-                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Fundo do Widget</label>
-                                <div class="flex bg-slate-800 border border-slate-700 rounded-xl p-0.5">
-                                    <button type="button" id="bgSolidBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all bg-brand-500 text-white shadow-md">Sólido</button>
-                                    <button type="button" id="bgTransBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all text-slate-400 hover:text-slate-200">Incolor (Transparente)</button>
-                                </div>
+                                <label for="manualReviewText" class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Texto da Avaliação</label>
+                                <textarea 
+                                    id="manualReviewText" 
+                                    rows="3" 
+                                    placeholder="Escreva o depoimento recebido..." 
+                                    class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-brand-500 placeholder-slate-700"
+                                ></textarea>
                             </div>
+                            
+                            <div>
+                                <label for="manualReviewAvatar" class="block text-[9px] font-bold text-slate-500 uppercase mb-1">URL do Avatar (Opcional)</label>
+                                <input 
+                                    type="url" 
+                                    id="manualReviewAvatar" 
+                                    placeholder="https://images.unsplash.com/..." 
+                                    class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-brand-500 placeholder-slate-700"
+                                >
+                            </div>
+                            
+                            <div>
+                                <label for="manualReviewPhotos" class="block text-[9px] font-bold text-slate-500 uppercase mb-1">URLs de Fotos Anexadas (Separadas por vírgula)</label>
+                                <input 
+                                    type="text" 
+                                    id="manualReviewPhotos" 
+                                    placeholder="https://..., https://..." 
+                                    class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-brand-500 placeholder-slate-700"
+                                >
+                            </div>
+                            
+                            <button 
+                                type="submit" 
+                                class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-[10px] uppercase tracking-wider transition-all"
+                            >
+                                Adicionar ao Widget
+                            </button>
+                        </form>
+                    </div>
+                </div>
 
-                            <!-- Font Size selector -->
-                            <div>
-                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Tamanho dos Textos</label>
-                                <select id="embedFontSize" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-[11px] text-slate-200 font-semibold focus:outline-none">
-                                    <option value="compact">Compacto</option>
-                                    <option value="default" selected>Padrão</option>
-                                    <option value="large">Grande</option>
-                                </select>
-                            </div>
+                <!-- 3. Local Saved Scrapings History -->
+                <div class="bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-2xl p-5 shadow-xl">
+                    <h2 class="text-xs font-bold text-slate-300 uppercase tracking-widest mb-3 flex items-center gap-2 border-b border-slate-800 pb-2">
+                        <i class="fa-solid fa-history text-brand-400"></i>
+                        <span>Últimas Consultas Salvas</span>
+                    </h2>
+                    
+                    <div id="historyList" class="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+                        <!-- Loaded dynamically -->
+                        <p class="text-[10px] text-slate-500 text-center py-2">Nenhuma consulta no histórico.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: PREVIEW, CURATOR & CODES GENERATOR (8 cols) -->
+            <div class="lg:col-span-8 space-y-6">
+                
+                <!-- Error Alert Alert Banner -->
+                <div id="errorMessage" class="hidden bg-red-950/50 border border-red-500/40 text-red-300 px-5 py-4 rounded-xl flex items-start space-x-3 backdrop-blur-md">
+                    <i class="fa-solid fa-triangle-exclamation mt-0.5 text-lg text-red-500"></i>
+                    <div>
+                        <span class="block font-bold text-xs text-red-200">Falha no Processamento</span>
+                        <span id="errorText" class="text-[10px] font-medium leading-relaxed block mt-0.5">Ocorreu um erro desconhecido.</span>
+                    </div>
+                </div>
+
+                <!-- LIVE PREVIEW CONTAINER & CONTROLS -->
+                <div id="previewCard" class="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 md:p-6 shadow-xl relative">
+                    
+                    <!-- Preview Header Bar -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800/85 pb-4 mb-5 gap-3">
+                        <div>
+                            <h3 class="text-sm font-bold font-title text-white flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                                <span>Painel de Visualização do Widget</span>
+                            </h3>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Veja em tempo real como o widget se comportará em diferentes telas.</p>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-1">
-                            <!-- Brand Accent Presets Visual Bubbles -->
-                            <div>
-                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Cor de Destaque da Marca</label>
-                                <div class="flex flex-wrap items-center gap-2.5 mt-1">
-                                    <button type="button" data-color="#0ea5e9" class="color-bubble w-7 h-7 rounded-full bg-[#0ea5e9] border border-white/20 flex items-center justify-center text-white focus:outline-none transition-all hover:scale-105 active:scale-95 shadow-md" title="Celeste">
-                                        <i class="fa-solid fa-check text-[9px] pointer-events-none"></i>
-                                    </button>
-                                    <button type="button" data-color="#4285f4" class="color-bubble w-7 h-7 rounded-full bg-[#4285f4] border border-white/20 flex items-center justify-center text-white focus:outline-none transition-all hover:scale-105 active:scale-95 shadow-md" title="Azul Google">
-                                        <i class="fa-solid fa-check text-[9px] hidden pointer-events-none"></i>
-                                    </button>
-                                    <button type="button" data-color="#10b981" class="color-bubble w-7 h-7 rounded-full bg-[#10b981] border border-white/20 flex items-center justify-center text-white focus:outline-none transition-all hover:scale-105 active:scale-95 shadow-md" title="Verde Esmeralda">
-                                        <i class="fa-solid fa-check text-[9px] hidden pointer-events-none"></i>
-                                    </button>
-                                    <button type="button" data-color="#f97316" class="color-bubble w-7 h-7 rounded-full bg-[#f97316] border border-white/20 flex items-center justify-center text-white focus:outline-none transition-all hover:scale-105 active:scale-95 shadow-md" title="Laranja Coral">
-                                        <i class="fa-solid fa-check text-[9px] hidden pointer-events-none"></i>
-                                    </button>
-                                    <button type="button" data-color="#8b5cf6" class="color-bubble w-7 h-7 rounded-full bg-[#8b5cf6] border border-white/20 flex items-center justify-center text-white focus:outline-none transition-all hover:scale-105 active:scale-95 shadow-md" title="Roxo Violeta">
-                                        <i class="fa-solid fa-check text-[9px] hidden pointer-events-none"></i>
-                                    </button>
-                                    <button type="button" data-color="custom" id="colorCustomBubble" class="color-bubble w-7 h-7 rounded-full bg-gradient-to-tr from-rose-500 via-yellow-400 to-brand-500 border border-white/20 flex items-center justify-center text-white focus:outline-none transition-all hover:scale-105 active:scale-95 shadow-md" title="Customizado">
-                                        <i class="fa-solid fa-palette text-[9px] pointer-events-none"></i>
-                                    </button>
-                                    
-                                    <!-- Dynamic Color Hex Input -->
-                                    <input type="text" id="embedAccentHex" value="#0ea5e9" placeholder="#ffffff" class="w-20 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1 text-[10px] text-slate-200 font-mono font-bold focus:outline-none focus:border-brand-500 ml-1.5" />
-                                </div>
-                            </div>
-
-                            <!-- Hover Effect selector -->
-                            <div>
-                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Efeito ao Passar o Mouse (Hover)</label>
-                                <select id="embedHoverEffect" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-[11px] text-slate-200 font-semibold focus:outline-none">
-                                    <option value="none">Nenhum</option>
-                                    <option value="lift" selected>Flutuar Levemente (Y)</option>
-                                    <option value="glow">Iluminação Neon Glow</option>
-                                </select>
-                            </div>
+                        <!-- Responsive Screen Selector Switcher -->
+                        <div class="flex bg-slate-950/80 border border-slate-800 p-0.5 rounded-lg self-start sm:self-auto">
+                            <button type="button" id="previewDeviceDesktop" class="px-3 py-1 rounded-md text-[10px] font-bold bg-brand-500 text-white shadow flex items-center gap-1.5 focus:outline-none">
+                                <i class="fa-solid fa-desktop"></i> Desktop
+                            </button>
+                            <button type="button" id="previewDeviceTablet" class="px-3 py-1 rounded-md text-[10px] font-bold text-slate-400 hover:text-slate-200 flex items-center gap-1.5 focus:outline-none">
+                                <i class="fa-solid fa-tablet-screen-button"></i> Tablet
+                            </button>
+                            <button type="button" id="previewDeviceMobile" class="px-3 py-1 rounded-md text-[10px] font-bold text-slate-400 hover:text-slate-200 flex items-center gap-1.5 focus:outline-none">
+                                <i class="fa-solid fa-mobile-screen-button"></i> Mobile
+                            </button>
                         </div>
                     </div>
 
-                    <!-- TAB 3: CONTENT & AI PANEL -->
-                    <div id="configPanelContent" class="space-y-5 hidden animate-[fadeIn_0.3s_ease-out]">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
-                            <!-- AI Review Summary -->
-                            <div>
-                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Resumo de IA</label>
-                                <div class="flex bg-slate-800 border border-slate-700 rounded-xl p-0.5">
-                                    <button type="button" id="aiSummaryShowBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all bg-brand-500 text-white shadow-md">Exibir Card</button>
-                                    <button type="button" id="aiSummaryHideBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all text-slate-400 hover:text-slate-200">Ocultar</button>
-                                </div>
-                            </div>
-
-                            <!-- Show Full Text toggle -->
-                            <div>
-                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Exibição do Texto</label>
-                                <div class="flex bg-slate-800 border border-slate-700 rounded-xl p-0.5">
-                                    <button type="button" id="textClampBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all bg-brand-500 text-white shadow-md">Com "Ler Mais"</button>
-                                    <button type="button" id="textFullBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all text-slate-400 hover:text-slate-200">Texto Completo</button>
-                                </div>
-                            </div>
-
-                            <!-- Show Attached Photos Toggle -->
-                            <div>
-                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Fotos Anexadas</label>
-                                <div class="flex bg-slate-800 border border-slate-700 rounded-xl p-0.5">
-                                    <button type="button" id="photosShowBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all bg-brand-500 text-white shadow-md">Exibir</button>
-                                    <button type="button" id="photosHideBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all text-slate-400 hover:text-slate-200">Ocultar</button>
-                                </div>
-                            </div>
-
-                            <!-- Show Google Logo toggle -->
-                            <div>
-                                <label class="block text-[10px] font-semibold text-slate-400 mb-1.5 uppercase">Selo do Google</label>
-                                <div class="flex bg-slate-800 border border-slate-700 rounded-xl p-0.5">
-                                    <button type="button" id="logoShowBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all bg-brand-500 text-white shadow-md">Exibir</button>
-                                    <button type="button" id="logoHideBtn" class="flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all text-slate-400 hover:text-slate-200">Ocultar</button>
+                    <!-- Simulator Frame (Responsive Container) -->
+                    <div class="flex justify-center bg-slate-950/20 border border-slate-800/40 rounded-2xl p-4 md:p-6 min-h-[300px] overflow-hidden">
+                        <div id="simulatedViewport" class="w-full transition-all duration-300 bg-transparent">
+                            <!-- Live widget preview rendered here by JS -->
+                            <div id="reviewsPreviewWrapper" class="w-full">
+                                <div class="text-center py-20 text-slate-500 text-xs">
+                                    <i class="fa-solid fa-inbox text-3xl mb-3 block text-slate-600"></i>
+                                    Nenhum depoimento carregado.<br>Cole uma URL de estabelecimento ou clique em <button type="button" class="text-brand-400 hover:underline font-semibold" onclick="document.getElementById('mockDataBtn').click();">Dados de Teste</button> para iniciar.
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Code Tab Selection -->
-                <div class="space-y-4">
-                    <!-- Tab Buttons -->
-                    <div class="flex border-b border-slate-700/40 overflow-x-auto scrollbar-none gap-2">
-                        <button type="button" id="tabEmbedBtn" class="px-4 py-2.5 text-xs font-semibold border-b-2 border-brand-500 text-brand-400 focus:outline-none whitespace-nowrap">
-                            <i class="fa-solid fa-code mr-1.5"></i> Widget HTML/CSS
-                        </button>
-                        <button type="button" id="tabJsonBtn" class="px-4 py-2.5 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 focus:outline-none whitespace-nowrap">
-                            <i class="fa-solid fa-braces mr-1.5"></i> Dados JSON
-                        </button>
-                        <button type="button" id="tabMarkdownBtn" class="px-4 py-2.5 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 focus:outline-none whitespace-nowrap">
-                            <i class="fa-brands fa-markdown mr-1.5"></i> Markdown List
-                        </button>
+                <!-- ANALYTICS & INSIGHTS CARD -->
+                <div id="analyticsCard" class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 shadow-xl hidden">
+                    <h3 class="text-xs font-bold text-slate-200 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-brand-400"></i>
+                        <span>Resumo Analítico & Sentimento</span>
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                        <div class="md:col-span-4 grid grid-cols-2 gap-2 text-center">
+                            <div class="bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/40">
+                                <span class="block text-[18px] font-extrabold text-white font-title" id="statAvgRating">0.0</span>
+                                <span class="block text-[8px] text-slate-500 uppercase font-bold mt-0.5">Média Geral</span>
+                            </div>
+                            <div class="bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/40">
+                                <span class="block text-[18px] font-extrabold text-white font-title" id="statTotalCount">0</span>
+                                <span class="block text-[8px] text-slate-500 uppercase font-bold mt-0.5">Total Lido</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-8 bg-slate-950/40 p-3 rounded-xl border border-slate-800/40 space-y-2">
+                            <div class="flex items-center justify-between text-[9px] font-bold uppercase text-slate-400">
+                                <span>Distribuição de Notas</span>
+                                <span class="text-slate-300">Positivo | Neutro | Negativo</span>
+                            </div>
+                            <div class="h-3 w-full bg-slate-900 rounded-full overflow-hidden flex">
+                                <div id="sentimentPositiveBar" class="h-full bg-emerald-500" style="width: 0%" title="Positivo (4-5 estrelas)"></div>
+                                <div id="sentimentNeutralBar" class="h-full bg-amber-500" style="width: 0%" title="Neutro (3 estrelas)"></div>
+                                <div id="sentimentNegativeBar" class="h-full bg-rose-500" style="width: 0%" title="Negativo (1-2 estrelas)"></div>
+                            </div>
+                            <div class="flex justify-between text-[8px] text-slate-500 font-bold">
+                                <span id="sentimentPositiveLabel">Positivo: 0%</span>
+                                <span id="sentimentNeutralLabel">Neutro: 0%</span>
+                                <span id="sentimentNegativeLabel">Negativo: 0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-800/40">
+                        <span class="block text-[9px] font-bold text-slate-400 uppercase mb-2">Termos mais citados (Clique para filtrar na prévia):</span>
+                        <div id="tagCloudContainer" class="flex flex-wrap gap-1.5">
+                            <span class="text-[9px] text-slate-500">Nenhum termo extraído.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TESTIMONIALS CURATION PANEL (The Curador) -->
+                <div id="curationCard" class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 shadow-xl hidden">
+                    <div class="border-b border-slate-800 pb-3 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h3 class="text-xs font-bold text-slate-200 uppercase tracking-widest flex items-center gap-2">
+                                <i class="fa-solid fa-user-check text-brand-400 text-xs"></i>
+                                <span>3. Curadoria de Depoimentos (<span id="totalCurationCount">0</span>)</span>
+                            </h3>
+                            <p class="text-[9px] text-slate-500 mt-0.5">Marque/Desmarque para decidir quais depoimentos exibir e mude a ordenação.</p>
+                        </div>
+
+                        <!-- Curation Global Select Actions -->
+                        <div class="flex items-center space-x-2 text-[9px] font-semibold">
+                            <button type="button" id="curationCheckAll" class="px-2.5 py-1 bg-slate-950 border border-slate-800 text-slate-300 hover:text-white rounded transition-colors">Marcar Todos</button>
+                            <button type="button" id="curationUncheckAll" class="px-2.5 py-1 bg-slate-950 border border-slate-800 text-slate-300 hover:text-white rounded transition-colors">Limpar Todos</button>
+                        </div>
                     </div>
 
-                    <!-- Code Textarea & Copy Actions -->
-                    <div class="relative group">
-                        <pre class="bg-slate-950 border border-slate-800 rounded-2xl p-5 text-xs font-mono text-slate-300 overflow-x-auto max-h-[380px] leading-relaxed"><code id="codeArea">HTML/CSS embed code loading...</code></pre>
+                    <!-- Curador Filters (Text search, sorting selection) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 mb-4 bg-slate-950/40 p-3 rounded-xl border border-slate-800/40">
+                        <!-- Local Live text search -->
+                        <div class="sm:col-span-6 relative">
+                            <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-magnifying-glass text-[10px] text-slate-500"></i>
+                            </div>
+                            <input 
+                                type="text" 
+                                id="curationSearchInput" 
+                                placeholder="Pesquisar nos depoimentos curados..." 
+                                class="w-full pl-7 pr-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-[11px] text-slate-300 placeholder-slate-600 focus:outline-none focus:border-brand-500"
+                            >
+                        </div>
+
+                        <!-- Sort Order dropdown selector -->
+                        <div class="sm:col-span-6 flex items-center space-x-2">
+                            <label for="curationSortSelect" class="text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">Ordenar por:</label>
+                            <select id="curationSortSelect" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-[11px] text-slate-300 focus:outline-none">
+                                <option value="original" selected>Ordem do Scrape (Padrão)</option>
+                                <option value="stars-desc">Maior Nota ★★★★★</option>
+                                <option value="stars-asc">Menor Nota ★☆☆☆☆</option>
+                                <option value="text-desc">Mais Detalhados (Texto Longo)</option>
+                                <option value="text-asc">Mais Curtos</option>
+                                <option value="shuffle">Aleatório (Shuffle)</option>
+                            </select>
+                        </div>
+
+                        <!-- Multi-select Stars Checkboxes & Media filters (New) -->
+                        <div class="sm:col-span-12 flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800/20">
+                            <div class="flex flex-wrap items-center gap-3">
+                                <span class="text-[9px] font-bold text-slate-500 uppercase">Filtrar Notas:</span>
+                                <label class="flex items-center gap-1 text-[10px] text-slate-300 font-semibold cursor-pointer">
+                                    <input type="checkbox" class="curation-star-filter w-3.5 h-3.5 rounded text-brand-500 bg-slate-950 border-slate-800" value="5" checked> 5★
+                                </label>
+                                <label class="flex items-center gap-1 text-[10px] text-slate-300 font-semibold cursor-pointer">
+                                    <input type="checkbox" class="curation-star-filter w-3.5 h-3.5 rounded text-brand-500 bg-slate-950 border-slate-800" value="4" checked> 4★
+                                </label>
+                                <label class="flex items-center gap-1 text-[10px] text-slate-300 font-semibold cursor-pointer">
+                                    <input type="checkbox" class="curation-star-filter w-3.5 h-3.5 rounded text-brand-500 bg-slate-950 border-slate-800" value="3" checked> 3★
+                                </label>
+                                <label class="flex items-center gap-1 text-[10px] text-slate-300 font-semibold cursor-pointer">
+                                    <input type="checkbox" class="curation-star-filter w-3.5 h-3.5 rounded text-brand-500 bg-slate-950 border-slate-800" value="2" checked> 2★
+                                </label>
+                                <label class="flex items-center gap-1 text-[10px] text-slate-300 font-semibold cursor-pointer">
+                                    <input type="checkbox" class="curation-star-filter w-3.5 h-3.5 rounded text-brand-500 bg-slate-950 border-slate-800" value="1" checked> 1★
+                                </label>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <label class="flex items-center gap-1.5 text-[9px] text-slate-400 font-bold uppercase cursor-pointer">
+                                    <input type="checkbox" id="curationFilterTextOnly" class="w-3.5 h-3.5 rounded text-brand-500 bg-slate-950 border-slate-800"> Apenas c/ Texto
+                                </label>
+                                <label class="flex items-center gap-1.5 text-[9px] text-slate-400 font-bold uppercase cursor-pointer">
+                                    <input type="checkbox" id="curationFilterPhotoOnly" class="w-3.5 h-3.5 rounded text-brand-500 bg-slate-950 border-slate-800"> Apenas c/ Foto
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scrollable Curation List containing cards -->
+                    <div id="curationItemsList" class="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
+                        <!-- Populated dynamically via script -->
+                    </div>
+                </div>
+
+                <!-- SPECTACULAR EMBED & CODES GENERATOR & DOWNLOADS -->
+                <div id="resultsSection" class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 shadow-xl hidden">
+                    <div class="border-b border-slate-800 pb-3 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h3 class="text-xs font-bold text-slate-200 uppercase tracking-widest flex items-center gap-2">
+                                <i class="fa-solid fa-code text-brand-400"></i>
+                                <span>4. Código de Incorporação (Embed)</span>
+                            </h3>
+                            <p class="text-[9px] text-slate-500 mt-0.5">Copie o widget customizado ou baixe os dados brutos e estruturados.</p>
+                        </div>
                         
-                        <!-- Floating Copy Button -->
-                        <button 
-                            type="button" 
-                            id="copyCodeBtn"
-                            class="absolute top-4 right-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white px-3.5 py-2 rounded-xl transition-all text-xs font-semibold flex items-center shadow-lg"
-                        >
-                            <i class="fa-regular fa-copy mr-1.5 text-sm"></i> Copiar Código
-                        </button>
+                        <!-- Utility action buttons: Download, Export CSV, JSON -->
+                        <div class="flex items-center space-x-2 text-[10px] font-semibold">
+                            <button type="button" id="btnExportCSV" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700/80 border border-slate-700/40 text-slate-300 hover:text-white rounded-lg transition-all flex items-center gap-1">
+                                <i class="fa-solid fa-file-csv text-[11px] text-emerald-400"></i> Exportar CSV
+                            </button>
+                            <button type="button" id="btnDownloadWidget" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700/80 border border-slate-700/40 text-slate-300 hover:text-white rounded-lg transition-all flex items-center gap-1">
+                                <i class="fa-solid fa-download text-[11px] text-brand-400"></i> Baixar Widget (.html)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Code Formats Tabs -->
+                    <div class="space-y-4">
+                        <div class="flex border-b border-slate-800 overflow-x-auto scrollbar-none gap-2">
+                            <button type="button" id="tabEmbedBtn" class="px-3 py-2 text-[11px] font-bold border-b-2 border-brand-500 text-brand-400 focus:outline-none whitespace-nowrap flex items-center gap-1">
+                                <i class="fa-solid fa-code"></i> Widget Autônomo HTML/CSS
+                            </button>
+                            <button type="button" id="tabJsonBtn" class="px-3 py-2 text-[11px] font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 focus:outline-none whitespace-nowrap flex items-center gap-1">
+                                <i class="fa-solid fa-braces"></i> Dados JSON
+                            </button>
+                            <button type="button" id="tabMarkdownBtn" class="px-3 py-2 text-[11px] font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 focus:outline-none whitespace-nowrap flex items-center gap-1">
+                                <i class="fa-brands fa-markdown"></i> Markdown List
+                            </button>
+                        </div>
+
+                        <!-- Code Display Area -->
+                        <div class="relative group">
+                            <pre class="bg-slate-950 border border-slate-850 rounded-xl p-4 text-[10.5px] font-mono text-slate-300 overflow-x-auto max-h-[300px] leading-relaxed"><code id="codeArea">Widget code loading...</code></pre>
+                            
+                            <!-- Floating Copy Button -->
+                            <button 
+                                type="button" 
+                                id="copyCodeBtn"
+                                class="absolute top-3.5 right-3.5 bg-slate-850 hover:bg-slate-750 border border-slate-750 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg transition-all text-[10px] font-bold flex items-center shadow-lg"
+                            >
+                                <i class="fa-regular fa-copy mr-1 text-xs"></i> Copiar Código
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </section>
+            </div>
         </div>
     </main>
 
-    <!-- Lightbox Popup Modal for Review Photos -->
-    <div id="lightboxModal" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-300">
+    <!-- Global Image Zoom Lightbox Popup Modal -->
+    <div id="lightboxModal" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-sm flex items-center justify-center p-4 transition-all duration-300">
         <button id="closeLightboxBtn" class="absolute top-6 right-6 text-white/70 hover:text-white text-3xl font-light focus:outline-none transition-colors"><i class="fa-solid fa-xmark"></i></button>
-        <button id="prevLightboxBtn" class="absolute left-6 text-white/70 hover:text-white text-3xl focus:outline-none hidden transition-colors bg-slate-850/60 p-3 rounded-full border border-slate-700/30"><i class="fa-solid fa-chevron-left"></i></button>
-        <button id="nextLightboxBtn" class="absolute right-6 text-white/70 hover:text-white text-3xl focus:outline-none hidden transition-colors bg-slate-850/60 p-3 rounded-full border border-slate-700/30"><i class="fa-solid fa-chevron-right"></i></button>
+        <button id="prevLightboxBtn" class="absolute left-6 text-white/70 hover:text-white text-3xl focus:outline-none hidden transition-colors bg-slate-900/60 p-3 rounded-full border border-slate-700/30"><i class="fa-solid fa-chevron-left"></i></button>
+        <button id="nextLightboxBtn" class="absolute right-6 text-white/70 hover:text-white text-3xl focus:outline-none hidden transition-colors bg-slate-900/60 p-3 rounded-full border border-slate-700/30"><i class="fa-solid fa-chevron-right"></i></button>
         <div class="max-w-4xl max-h-[85vh] flex items-center justify-center">
-            <img id="lightboxImg" src="" alt="Photo Preview" class="max-w-full max-h-[80vh] rounded-xl object-contain border border-slate-800 shadow-2xl transition-all duration-300 scale-95 opacity-0">
+            <img id="lightboxImg" src="" referrerpolicy="no-referrer" alt="Photo Preview" class="max-w-full max-h-[80vh] rounded-xl object-contain border border-slate-800 shadow-2xl transition-all duration-300 scale-95 opacity-0">
         </div>
     </div>
 
+    <!-- Modal de Edição de Depoimento -->
+    <div id="editReviewModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-white uppercase tracking-wider font-title flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-brand-400"></i>
+                    <span>Editar Depoimento</span>
+                </h3>
+                <button type="button" id="closeEditModalBtn" class="text-slate-400 hover:text-white text-xl focus:outline-none">&times;</button>
+            </div>
+            <form id="editReviewForm" class="space-y-3.5">
+                <input type="hidden" id="editReviewIndex">
+                <div>
+                    <label for="editReviewName" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nome do Autor</label>
+                    <input type="text" id="editReviewName" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="editReviewRating" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nota (Estrelas)</label>
+                        <select id="editReviewRating" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-xs text-white focus:outline-none">
+                            <option value="5">5 Estrelas</option>
+                            <option value="4">4 Estrelas</option>
+                            <option value="3">3 Estrelas</option>
+                            <option value="2">2 Estrelas</option>
+                            <option value="1">1 Estrela</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="editReviewDate" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Data / Tempo</label>
+                        <input type="text" id="editReviewDate" placeholder="Ex: hoje, há 2 semanas" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label for="editReviewText" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Comentário</label>
+                    <textarea id="editReviewText" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500 placeholder-slate-700" placeholder="Escreva o comentário do depoimento..."></textarea>
+                </div>
+                <div>
+                    <label for="editReviewPhoto" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">URL do Avatar</label>
+                    <input type="text" id="editReviewPhoto" placeholder="https://..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                </div>
+                <div>
+                    <label for="editReviewPhotos" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">URLs de Fotos Anexadas (separadas por vírgula)</label>
+                    <input type="text" id="editReviewPhotos" placeholder="https://..., https://..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                </div>
+                <div class="flex items-center justify-end space-x-2 pt-2">
+                    <button type="button" id="cancelEditModalBtn" class="px-4 py-2 bg-slate-850 hover:bg-slate-750 text-xs font-bold text-slate-300 rounded-xl transition-all">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-xs font-bold text-white rounded-xl transition-all">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Application Script -->
     <script src="script.js"></script>
 </body>
 </html>
