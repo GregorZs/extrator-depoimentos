@@ -417,60 +417,116 @@ function generateLocalAiSummary(reviews) {
     if (!reviews || reviews.length === 0) return null;
     
     const count = reviews.length;
-    const avgRating = (reviews.reduce((acc, r) => acc + r.rating, 0) / count).toFixed(1);
+    const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+    const avgRating = (totalRating / count).toFixed(1);
+    const ratingNum = parseFloat(avgRating);
     
-    const positiveWords = [
-        { word: 'Atendimento', synonyms: ['atendimento', 'atencioso', 'equipe', 'funcionários', 'recepção', 'simpático', 'gentil'] },
-        { word: 'Ambiente', synonyms: ['ambiente', 'lugar', 'espaço', 'decor', 'limpo', 'limpeza', 'aconchegante', 'agradável'] },
-        { word: 'Qualidade do Serviço', synonyms: ['qualidade', 'excelente', 'ótimo', 'maravilhoso', 'perfeito', 'impecável', 'sensacional'] },
-        { word: 'Custo-Benefício', synonyms: ['preço', 'barato', 'custo', 'benefício', 'valor', 'justo', 'acessível'] },
-        { word: 'Experiência Geral', synonyms: ['comida', 'sabor', 'prato', 'delicioso', 'serviço', 'lanche', 'recomendo', 'experiência', 'adoramos'] }
-    ];
+    const categories = {
+        'Atendimento': {
+            pos: ['atendimento', 'atencioso', 'equipe', 'funcionários', 'recepção', 'simpático', 'gentil', 'atendente', 'serviço', 'educado', 'prestativo', 'cordial'],
+            neg: ['demora', 'lento', 'desorganizado', 'grosseiro', 'mal educado', 'ruim', 'péssimo', 'desatencioso', 'grosseria', 'espera', 'atraso']
+        },
+        'Ambiente': {
+            pos: ['ambiente', 'lugar', 'espaço', 'decor', 'limpo', 'limpeza', 'aconchegante', 'agradável', 'lindo', 'bonito', 'organizado', 'arejado'],
+            neg: ['sujo', 'sujeira', 'barulhento', 'barulho', 'apertado', 'escura', 'quente', 'abafado', 'bagunçado', 'desorganizado']
+        },
+        'Qualidade do Serviço': {
+            pos: ['qualidade', 'excelente', 'ótimo', 'maravilhoso', 'perfeito', 'impecável', 'sensacional', 'delicioso', 'sabor', 'comida', 'prato', 'gostoso', 'saboroso'],
+            neg: ['frio', 'gelado', 'queimado', 'sem sabor', 'ruim', 'fraco', 'estragado', 'cru', 'duro', 'gorduroso', 'insosso']
+        },
+        'Custo-Benefício': {
+            pos: ['preço', 'barato', 'custo', 'benefício', 'valor', 'justo', 'acessível', 'vale a pena'],
+            neg: ['caro', 'caríssimo', 'facada', 'preço absurdo', 'abusivo', 'não vale', 'preço alto', 'salgado']
+        }
+    };
     
-    const freq = {};
-    positiveWords.forEach(pw => {
-        freq[pw.word] = 0;
-        reviews.forEach(r => {
-            if (r.text) {
-                const lowerText = r.text.toLowerCase();
-                pw.synonyms.forEach(syn => {
+    const posFreq = { 'Atendimento': 0, 'Ambiente': 0, 'Qualidade do Serviço': 0, 'Custo-Benefício': 0 };
+    const negFreq = { 'Atendimento': 0, 'Ambiente': 0, 'Qualidade do Serviço': 0, 'Custo-Benefício': 0 };
+    
+    reviews.forEach(r => {
+        if (r.text) {
+            const lowerText = r.text.toLowerCase();
+            Object.keys(categories).forEach(cat => {
+                // Check positive synonyms
+                categories[cat].pos.forEach(syn => {
                     if (lowerText.includes(syn)) {
-                        freq[pw.word]++;
+                        if (r.rating >= 3) {
+                            posFreq[cat]++;
+                        } else {
+                            negFreq[cat]++;
+                        }
                     }
                 });
-            }
-        });
+                // Check negative synonyms
+                categories[cat].neg.forEach(syn => {
+                    if (lowerText.includes(syn)) {
+                        if (r.rating <= 3) {
+                            negFreq[cat]++;
+                        } else {
+                            posFreq[cat]++;
+                        }
+                    }
+                });
+            });
+        }
     });
     
-    // Classifica as características mais mencionadas
-    const sortedFeatures = Object.keys(freq).sort((a, b) => freq[b] - freq[a]);
-    const topFeature = sortedFeatures[0] || 'Experiência Geral';
-    const secondFeature = sortedFeatures[1] || 'Qualidade do Serviço';
+    const sortedPosFeatures = Object.keys(posFreq).sort((a, b) => posFreq[b] - posFreq[a]);
+    const sortedNegFeatures = Object.keys(negFreq).sort((a, b) => negFreq[b] - negFreq[a]);
+    
+    const topPosFeature = posFreq[sortedPosFeatures[0]] > 0 ? sortedPosFeatures[0] : 'Qualidade do Serviço';
+    const secondPosFeature = posFreq[sortedPosFeatures[1]] > 0 ? sortedPosFeatures[1] : 'Atendimento';
+    
+    const topNegFeature = negFreq[sortedNegFeatures[0]] > 0 ? sortedNegFeatures[0] : 'Qualidade do Serviço';
+    const secondNegFeature = negFreq[sortedNegFeatures[1]] > 0 ? sortedNegFeatures[1] : 'Atendimento';
     
     let summaryParagraph = '';
-    if (parseFloat(avgRating) >= 4.5) {
-        summaryParagraph = `Com base nas avaliações analisadas, o estabelecimento destaca-se com uma reputação **excepcional** e média de **${avgRating}/5.0 estrelas**. A satisfação dos clientes é altíssima, sendo fortemente recomendada pelas ótimas menções a **${topFeature.toLowerCase()}** e **${secondFeature.toLowerCase()}**. Os depoimentos reforçam a confiabilidade do local.`;
-    } else if (parseFloat(avgRating) >= 3.8) {
-        summaryParagraph = `Os depoimentos analisados indicam um índice de aprovação **altamente positivo**, com média de **${avgRating}/5.0 estrelas**. Os clientes elogiam com frequência o **${topFeature.toLowerCase()}** e a consistência em **${secondFeature.toLowerCase()}**, qualificando o estabelecimento como uma excelente escolha geral.`;
+    
+    if (ratingNum >= 4.3) {
+        summaryParagraph = `Com base nas avaliações analisadas, o estabelecimento destaca-se com uma reputação **excepcional** e média de **${avgRating}/5.0 estrelas**. A satisfação dos clientes é altíssima, sendo fortemente recomendada pelas ótimas menções a **${topPosFeature.toLowerCase()}** e **${secondPosFeature.toLowerCase()}**. Os depoimentos reforçam a confiabilidade do local.`;
+        if (negFreq[topNegFeature] > 1) {
+            summaryParagraph += ` Alguns clientes pontuaram pequenos ajustes em relação a **${topNegFeature.toLowerCase()}**.`;
+        }
+    } else if (ratingNum >= 3.6) {
+        summaryParagraph = `Os depoimentos analisados indicam um índice de aprovação **altamente positivo**, com média de **${avgRating}/5.0 estrelas**. Os clientes elogiam com frequência o **${topPosFeature.toLowerCase()}** e a consistência em **${secondPosFeature.toLowerCase()}**, qualificando o estabelecimento como uma excelente escolha geral.`;
+        if (negFreq[topNegFeature] > 1) {
+            summaryParagraph += ` No entanto, há relatos indicando oportunidades de melhoria em **${topNegFeature.toLowerCase()}**.`;
+        }
+    } else if (ratingNum >= 2.8) {
+        summaryParagraph = `A análise das avaliações apresenta uma reputação **mista/neutra**, com média de **${avgRating}/5.0 estrelas**. Embora o estabelecimento receba elogios pontuais por seu **${topPosFeature.toLowerCase()}**, existem queixas recorrentes sobre **${topNegFeature.toLowerCase()}** que afetam a experiência de alguns clientes.`;
     } else {
-        summaryParagraph = `A análise local de avaliações apresenta uma reputação estável, com média de **${avgRating}/5.0 estrelas**. Os pontos fortes que mais se destacam são o **${topFeature.toLowerCase()}**, com áreas sugeridas para feedback e aprimoramento constante.`;
+        summaryParagraph = `As avaliações analisadas indicam críticas e pontos de atenção **críticos**, com média de **${avgRating}/5.0 estrelas**. O descontentamento geral está concentrado principalmente em problemas com **${topNegFeature.toLowerCase()}** e **${secondNegFeature.toLowerCase()}**, exigindo ajustes urgentes. Elogios ao **${topPosFeature.toLowerCase()}** são raros no momento.`;
     }
     
-    // Lista de marcadores de destaque
     const highlights = [];
-    if (freq['Atendimento'] > 0) highlights.push('Equipe e atendimento elogiados');
-    if (freq['Ambiente'] > 0) highlights.push('Ambiente acolhedor e aconchegante');
-    if (freq['Qualidade do Serviço'] > 0) highlights.push('Alta qualidade percebida nos serviços');
-    if (freq['Experiência Geral'] > 0) highlights.push('Experiência geral marcante e saborosa');
-    if (freq['Custo-Benefício'] > 0) highlights.push('Ótimo custo-benefício relatado');
+    if (ratingNum >= 3.6) {
+        if (posFreq['Atendimento'] > 0) highlights.push('Equipe e atendimento elogiados');
+        if (posFreq['Ambiente'] > 0) highlights.push('Ambiente acolhedor e limpo');
+        if (posFreq['Qualidade do Serviço'] > 0) highlights.push('Alta qualidade nos serviços/produtos');
+        if (posFreq['Custo-Benefício'] > 0) highlights.push('Excelente custo-benefício relatado');
+    } else {
+        if (negFreq['Atendimento'] > 1) highlights.push('Atenção: queixas sobre atendimento');
+        if (negFreq['Ambiente'] > 1) highlights.push('Atenção: reclamações sobre o ambiente');
+        if (negFreq['Qualidade do Serviço'] > 1) highlights.push('Instabilidade na qualidade do serviço');
+        if (negFreq['Custo-Benefício'] > 1) highlights.push('Preço considerado acima do valor percebido');
+    }
     
-    if (highlights.length === 0) {
-        highlights.push('Serviço confiável e atencioso');
-        highlights.push('Recomendado pela comunidade local');
+    // Fill up to 3 highlights if needed
+    const defaultPosHighlights = ['Serviço confiável e atencioso', 'Recomendado pela comunidade local', 'Destaque na região'];
+    const defaultNegHighlights = ['Requer atenção aos feedbacks', 'Pontos de melhoria identificados', 'Serviço sob avaliação'];
+    
+    while (highlights.length < 3) {
+        const defaults = ratingNum >= 3.6 ? defaultPosHighlights : defaultNegHighlights;
+        const nextDefault = defaults.find(item => !highlights.includes(item));
+        if (nextDefault) {
+            highlights.push(nextDefault);
+        } else {
+            break;
+        }
     }
     
     return {
-        averageRating: parseFloat(avgRating),
+        averageRating: ratingNum,
         totalAnalyzed: count,
         summary: summaryParagraph,
         highlights: highlights.slice(0, 3)

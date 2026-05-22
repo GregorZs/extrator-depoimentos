@@ -148,6 +148,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Elements tab visibility controls
     const elementAiSummaryToggle = document.getElementById('elementAiSummaryToggle');
+    const elementAiSummaryCustomToggle = document.getElementById('elementAiSummaryCustomToggle');
+    const aiSummaryCustomizationPanel = document.getElementById('aiSummaryCustomizationPanel');
+    const aiSummaryCustomFields = document.getElementById('aiSummaryCustomFields');
+    const elementAiSummaryTextVal = document.getElementById('elementAiSummaryTextVal');
+    const elementAiSummaryHighlight1 = document.getElementById('elementAiSummaryHighlight1');
+    const elementAiSummaryHighlight2 = document.getElementById('elementAiSummaryHighlight2');
+    const elementAiSummaryHighlight3 = document.getElementById('elementAiSummaryHighlight3');
     const elementAvatarsToggle = document.getElementById('elementAvatarsToggle');
     const elementDatesToggle = document.getElementById('elementDatesToggle');
     const elementPhotosToggle = document.getElementById('elementPhotosToggle');
@@ -270,6 +277,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Elements visibility
     let showAiSummary = true;
+    let customAiSummaryEnabled = false;
+    let customAiSummaryText = '';
+    let customAiSummaryHighlights = ['', '', ''];
     let showAvatars = true;
     let showDates = true;
     let showPhotos = true;
@@ -792,6 +802,46 @@ document.addEventListener('DOMContentLoaded', () => {
     // Elements visibility toggles
     elementAiSummaryToggle.addEventListener('change', (e) => {
         showAiSummary = e.target.checked;
+        if (showAiSummary) {
+            aiSummaryCustomizationPanel.classList.remove('hidden');
+        } else {
+            aiSummaryCustomizationPanel.classList.add('hidden');
+        }
+        renderReviewsGrid();
+        updateEmbedCode();
+    });
+
+    elementAiSummaryCustomToggle.addEventListener('change', (e) => {
+        customAiSummaryEnabled = e.target.checked;
+        if (customAiSummaryEnabled) {
+            aiSummaryCustomFields.classList.remove('hidden');
+        } else {
+            aiSummaryCustomFields.classList.add('hidden');
+        }
+        renderReviewsGrid();
+        updateEmbedCode();
+    });
+
+    elementAiSummaryTextVal.addEventListener('input', (e) => {
+        customAiSummaryText = e.target.value;
+        renderReviewsGrid();
+        updateEmbedCode();
+    });
+
+    elementAiSummaryHighlight1.addEventListener('input', (e) => {
+        customAiSummaryHighlights[0] = e.target.value;
+        renderReviewsGrid();
+        updateEmbedCode();
+    });
+
+    elementAiSummaryHighlight2.addEventListener('input', (e) => {
+        customAiSummaryHighlights[1] = e.target.value;
+        renderReviewsGrid();
+        updateEmbedCode();
+    });
+
+    elementAiSummaryHighlight3.addEventListener('input', (e) => {
+        customAiSummaryHighlights[2] = e.target.value;
         renderReviewsGrid();
         updateEmbedCode();
     });
@@ -934,6 +984,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         currentReviewsData = reviews;
         currentReviewsAiSummary = aiSummary;
+
+        // Reset AI Summary customization state for the new data
+        customAiSummaryEnabled = false;
+        if (elementAiSummaryCustomToggle) {
+            elementAiSummaryCustomToggle.checked = false;
+        }
+        if (aiSummaryCustomFields) {
+            aiSummaryCustomFields.classList.add('hidden');
+        }
 
         // Default headerReviewUrl to current urlInput value if it starts with http
         if (urlInput.value && urlInput.value.startsWith('http') && !headerReviewUrl) {
@@ -1327,8 +1386,149 @@ document.addEventListener('DOMContentLoaded', () => {
         return activeList.map(item => item.review);
     }
 
+    function generateLocalAiSummary(reviews) {
+        if (!reviews || reviews.length === 0) return null;
+        
+        const count = reviews.length;
+        const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+        const avgRating = (totalRating / count).toFixed(1);
+        const ratingNum = parseFloat(avgRating);
+
+        if (customAiSummaryEnabled) {
+            return {
+                averageRating: ratingNum,
+                totalAnalyzed: count,
+                summary: customAiSummaryText || 'Nenhum resumo disponível.',
+                highlights: customAiSummaryHighlights.filter(h => h.trim().length > 0)
+            };
+        }
+        
+        const categories = {
+            'Atendimento': {
+                pos: ['atendimento', 'atencioso', 'equipe', 'funcionários', 'recepção', 'simpático', 'gentil', 'atendente', 'serviço', 'educado', 'prestativo', 'cordial'],
+                neg: ['demora', 'lento', 'desorganizado', 'grosseiro', 'mal educado', 'ruim', 'péssimo', 'desatencioso', 'grosseria', 'espera', 'atraso']
+            },
+            'Ambiente': {
+                pos: ['ambiente', 'lugar', 'espaço', 'decor', 'limpo', 'limpeza', 'aconchegante', 'agradável', 'lindo', 'bonito', 'organizado', 'arejado'],
+                neg: ['sujo', 'sujeira', 'barulhento', 'barulho', 'apertado', 'escura', 'quente', 'abafado', 'bagunçado', 'desorganizado']
+            },
+            'Qualidade do Serviço': {
+                pos: ['qualidade', 'excelente', 'ótimo', 'maravilhoso', 'perfeito', 'impecável', 'sensacional', 'delicioso', 'sabor', 'comida', 'prato', 'gostoso', 'saboroso'],
+                neg: ['frio', 'gelado', 'queimado', 'sem sabor', 'ruim', 'fraco', 'estragado', 'cru', 'duro', 'gorduroso', 'insosso']
+            },
+            'Custo-Benefício': {
+                pos: ['preço', 'barato', 'custo', 'benefício', 'valor', 'justo', 'acessível', 'vale a pena'],
+                neg: ['caro', 'caríssimo', 'facada', 'preço absurdo', 'abusivo', 'não vale', 'preço alto', 'salgado']
+            }
+        };
+        
+        const posFreq = { 'Atendimento': 0, 'Ambiente': 0, 'Qualidade do Serviço': 0, 'Custo-Benefício': 0 };
+        const negFreq = { 'Atendimento': 0, 'Ambiente': 0, 'Qualidade do Serviço': 0, 'Custo-Benefício': 0 };
+        
+        reviews.forEach(r => {
+            if (r.text) {
+                const lowerText = r.text.toLowerCase();
+                Object.keys(categories).forEach(cat => {
+                    // Check positive synonyms
+                    categories[cat].pos.forEach(syn => {
+                        if (lowerText.includes(syn)) {
+                            if (r.rating >= 3) {
+                                posFreq[cat]++;
+                            } else {
+                                negFreq[cat]++;
+                            }
+                        }
+                    });
+                    // Check negative synonyms
+                    categories[cat].neg.forEach(syn => {
+                        if (lowerText.includes(syn)) {
+                            if (r.rating <= 3) {
+                                negFreq[cat]++;
+                            } else {
+                                posFreq[cat]++;
+                            }
+                        }
+                    });
+                });
+            }
+        });
+        
+        const sortedPosFeatures = Object.keys(posFreq).sort((a, b) => posFreq[b] - posFreq[a]);
+        const sortedNegFeatures = Object.keys(negFreq).sort((a, b) => negFreq[b] - negFreq[a]);
+        
+        const topPosFeature = posFreq[sortedPosFeatures[0]] > 0 ? sortedPosFeatures[0] : 'Qualidade do Serviço';
+        const secondPosFeature = posFreq[sortedPosFeatures[1]] > 0 ? sortedPosFeatures[1] : 'Atendimento';
+        
+        const topNegFeature = negFreq[sortedNegFeatures[0]] > 0 ? sortedNegFeatures[0] : 'Qualidade do Serviço';
+        const secondNegFeature = negFreq[sortedNegFeatures[1]] > 0 ? sortedNegFeatures[1] : 'Atendimento';
+        
+        let summaryParagraph = '';
+        
+        if (ratingNum >= 4.3) {
+            summaryParagraph = `Com base nas avaliações analisadas, o estabelecimento destaca-se com uma reputação **excepcional** e média de **${avgRating}/5.0 estrelas**. A satisfação dos clientes é altíssima, sendo fortemente recomendada pelas ótimas menções a **${topPosFeature.toLowerCase()}** e **${secondPosFeature.toLowerCase()}**. Os depoimentos reforçam a confiabilidade do local.`;
+            if (negFreq[topNegFeature] > 1) {
+                summaryParagraph += ` Alguns clientes pontuaram pequenos ajustes em relação a **${topNegFeature.toLowerCase()}**.`;
+            }
+        } else if (ratingNum >= 3.6) {
+            summaryParagraph = `Os depoimentos analisados indicam um índice de aprovação **altamente positivo**, com média de **${avgRating}/5.0 estrelas**. Os clientes elogiam com frequência o **${topPosFeature.toLowerCase()}** e a consistência em **${secondPosFeature.toLowerCase()}**, qualificando o estabelecimento como uma excelente escolha geral.`;
+            if (negFreq[topNegFeature] > 1) {
+                summaryParagraph += ` No entanto, há relatos indicando oportunidades de melhoria em **${topNegFeature.toLowerCase()}**.`;
+            }
+        } else if (ratingNum >= 2.8) {
+            summaryParagraph = `A análise das avaliações apresenta uma reputação **mista/neutra**, com média de **${avgRating}/5.0 estrelas**. Embora o estabelecimento receba elogios pontuais por seu **${topPosFeature.toLowerCase()}**, existem queixas recorrentes sobre **${topNegFeature.toLowerCase()}** que afetam a experiência de alguns clientes.`;
+        } else {
+            summaryParagraph = `As avaliações analisadas indicam críticas e pontos de atenção **críticos**, com média de **${avgRating}/5.0 estrelas**. O descontentamento geral está concentrado principalmente em problemas com **${topNegFeature.toLowerCase()}** e **${secondNegFeature.toLowerCase()}**, exigindo ajustes urgentes. Elogios ao **${topPosFeature.toLowerCase()}** são raros no momento.`;
+        }
+        
+        const highlights = [];
+        if (ratingNum >= 3.6) {
+            if (posFreq['Atendimento'] > 0) highlights.push('Equipe e atendimento elogiados');
+            if (posFreq['Ambiente'] > 0) highlights.push('Ambiente acolhedor e limpo');
+            if (posFreq['Qualidade do Serviço'] > 0) highlights.push('Alta qualidade nos serviços/produtos');
+            if (posFreq['Custo-Benefício'] > 0) highlights.push('Excelente custo-benefício relatado');
+        } else {
+            if (negFreq['Atendimento'] > 1) highlights.push('Atenção: queixas sobre atendimento');
+            if (negFreq['Ambiente'] > 1) highlights.push('Atenção: reclamações sobre o ambiente');
+            if (negFreq['Qualidade do Serviço'] > 1) highlights.push('Instabilidade na qualidade do serviço');
+            if (negFreq['Custo-Benefício'] > 1) highlights.push('Preço considerado acima do valor percebido');
+        }
+        
+        // Fill up to 3 highlights if needed
+        const defaultPosHighlights = ['Serviço confiável e atencioso', 'Recomendado pela comunidade local', 'Destaque na região'];
+        const defaultNegHighlights = ['Requer atenção aos feedbacks', 'Pontos de melhoria identificados', 'Serviço sob avaliação'];
+        
+        while (highlights.length < 3) {
+            const defaults = ratingNum >= 3.6 ? defaultPosHighlights : defaultNegHighlights;
+            const nextDefault = defaults.find(item => !highlights.includes(item));
+            if (nextDefault) {
+                highlights.push(nextDefault);
+            } else {
+                break;
+            }
+        }
+        
+        // Auto-populate custom inputs with dynamically generated text if custom mode is off
+        if (elementAiSummaryTextVal) {
+            elementAiSummaryTextVal.value = summaryParagraph;
+            elementAiSummaryHighlight1.value = highlights[0] || '';
+            elementAiSummaryHighlight2.value = highlights[1] || '';
+            elementAiSummaryHighlight3.value = highlights[2] || '';
+            
+            customAiSummaryText = summaryParagraph;
+            customAiSummaryHighlights = [highlights[0] || '', highlights[1] || '', highlights[2] || ''];
+        }
+        
+        return {
+            averageRating: ratingNum,
+            totalAnalyzed: count,
+            summary: summaryParagraph,
+            highlights: highlights.slice(0, 3)
+        };
+    }
+
     function buildWidgetHTMLAndCSS() {
         const activeReviews = getActiveReviews();
+        const activeAiSummary = generateLocalAiSummary(activeReviews);
         
         // CSS Style values mapping
         const isDark = widgetTheme === 'dark';
@@ -1346,8 +1546,8 @@ document.addEventListener('DOMContentLoaded', () => {
             let averageRatingValue = '5.0';
             let totalReviewsCount = activeReviews.length;
             
-            if (currentReviewsAiSummary) {
-                averageRatingValue = currentReviewsAiSummary.averageRating;
+            if (activeAiSummary) {
+                averageRatingValue = activeAiSummary.averageRating;
             }
             
             const roundedRating = Math.round(parseFloat(averageRatingValue));
@@ -1418,9 +1618,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 1. AI Summary Card Markup
         let aiSummaryCardHTML = '';
-        if (showAiSummary && currentReviewsAiSummary) {
+        if (showAiSummary && activeAiSummary) {
             let bulletsHTML = '';
-            currentReviewsAiSummary.highlights.forEach(hl => {
+            activeAiSummary.highlights.forEach(hl => {
                 bulletsHTML += `
                 <div class="ai-bullet">
                     <svg viewBox="0 0 20 20" fill="currentColor" width="13" height="13"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l3-3z" clip-rule="evenodd" /></svg>
@@ -1428,7 +1628,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>`;
             });
 
-            const cleanSummaryText = currentReviewsAiSummary.summary.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            const cleanSummaryText = activeAiSummary.summary.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             const summaryCardClass = widgetTemplate === 'slide' ? 'ai-summary-card slide-item snap-item' : 'ai-summary-card';
 
             aiSummaryCardHTML = `
@@ -1449,8 +1649,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 <div class="ai-footer">
-                    <span>Média local: ★ ${currentReviewsAiSummary.averageRating}</span>
-                    <span>Análise de ${currentReviewsAiSummary.totalAnalyzed} depoimentos</span>
+                    <span>Média local: ★ ${activeAiSummary.averageRating}</span>
+                    <span>Análise de ${activeAiSummary.totalAnalyzed} depoimentos</span>
                 </div>
             </div>
             `;
@@ -1671,8 +1871,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }`;
         } else if (widgetTemplate === 'badge') {
             // Summary Badge markup
-            const avg = currentReviewsAiSummary ? currentReviewsAiSummary.averageRating : 5.0;
-            const tot = currentReviewsAiSummary ? currentReviewsAiSummary.totalAnalyzed : activeReviews.length;
+            const avg = activeAiSummary ? activeAiSummary.averageRating : 5.0;
+            const tot = activeAiSummary ? activeAiSummary.totalAnalyzed : activeReviews.length;
             let badgeStars = '';
             for(let i=0; i<5; i++) badgeStars += (i < Math.round(avg)) ? '★' : '☆';
 
@@ -1747,7 +1947,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }`;
         } else if (widgetTemplate === 'floating') {
             // Floating badge preview (rendered layout)
-            const avg = currentReviewsAiSummary ? currentReviewsAiSummary.averageRating : 5.0;
+            const avg = activeAiSummary ? activeAiSummary.averageRating : 5.0;
             let badgeStars = '';
             for(let i=0; i<5; i++) badgeStars += (i < Math.round(avg)) ? '★' : '☆';
 
@@ -2292,6 +2492,10 @@ document.addEventListener('DOMContentLoaded', () => {
             previewCarouselTimer = null;
         }
 
+        const activeReviews = getActiveReviews();
+        updateSentimentAnalytics(activeReviews);
+        updateKeywordTagCloud(activeReviews);
+
         const { html, css } = buildWidgetHTMLAndCSS();
         
         reviewsPreviewWrapper.innerHTML = `
@@ -2305,7 +2509,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const widget = reviewsPreviewWrapper.querySelector('#google-reviews-widget');
         if (!widget) return;
 
-        const activeReviews = getActiveReviews();
 
         // 1. Slider controls wire
         const prevBtn = widget.querySelector('#slider-arrow-prev');
@@ -2500,6 +2703,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!currentReviewsData) return;
 
         const activeReviews = getActiveReviews();
+        const activeAiSummary = generateLocalAiSummary(activeReviews);
 
         if (activeCodeTab === 'embed') {
             const { html, css } = buildWidgetHTMLAndCSS();
@@ -2676,11 +2880,11 @@ ${css}
         } else if (activeCodeTab === 'markdown') {
             let md = `# Depoimentos Curados do Google Maps\n\n`;
 
-            if (showAiSummary && currentReviewsAiSummary) {
+            if (showAiSummary && activeAiSummary) {
                 md += `## 🤖 Resumo Inteligente de IA\n\n`;
-                md += `> "${currentReviewsAiSummary.summary}"\n\n`;
+                md += `> "${activeAiSummary.summary}"\n\n`;
                 md += `**Destaques Principais:**\n`;
-                currentReviewsAiSummary.highlights.forEach(hl => {
+                activeAiSummary.highlights.forEach(hl => {
                     md += `- ${hl}\n`;
                 });
                 md += `\n---\n\n`;

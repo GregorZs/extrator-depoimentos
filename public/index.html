@@ -449,6 +449,30 @@
                             </label>
                         </div>
 
+                        <!-- AI Summary Customization Fields (shown when elementAiSummaryToggle is checked) -->
+                        <div id="aiSummaryCustomizationPanel" class="space-y-2.5 pl-3 border-l border-slate-800 mt-1">
+                            <div class="flex items-center justify-between p-1 bg-slate-950/20 rounded-lg">
+                                <span class="text-[9px] font-bold text-slate-400 uppercase">Personalizar Resumo (Editar)</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="elementAiSummaryCustomToggle" class="sr-only peer">
+                                    <div class="w-6 h-3 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-slate-400 after:rounded-full after:h-2.5 after:w-2.5 after:transition-all peer-checked:bg-brand-500"></div>
+                                </label>
+                            </div>
+                            <div id="aiSummaryCustomFields" class="space-y-2 hidden">
+                                <div class="space-y-1">
+                                    <label for="elementAiSummaryTextVal" class="block text-[8px] font-bold text-slate-500 uppercase">Texto do Resumo</label>
+                                    <textarea id="elementAiSummaryTextVal" rows="3" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-[10px] text-slate-300 focus:ring-1 focus:ring-brand-500 focus:outline-none" placeholder="Digite o resumo customizado..."></textarea>
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[8px] font-bold text-slate-500 uppercase">Destaques Principais (Marcadores)</label>
+                                    <input type="text" id="elementAiSummaryHighlight1" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-[10px] text-slate-300 focus:ring-1 focus:ring-brand-500 focus:outline-none" placeholder="Destaque 1">
+                                    <input type="text" id="elementAiSummaryHighlight2" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-[10px] text-slate-300 focus:ring-1 focus:ring-brand-500 focus:outline-none mt-1" placeholder="Destaque 2">
+                                    <input type="text" id="elementAiSummaryHighlight3" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-[10px] text-slate-300 focus:ring-1 focus:ring-brand-500 focus:outline-none mt-1" placeholder="Destaque 3">
+                                </div>
+                            </div>
+                        </div>
+
+
                         <!-- Hide Avatars toggle -->
                         <div class="flex items-center justify-between p-2.5 bg-slate-950/40 rounded-xl border border-slate-800/40">
                             <div>
