@@ -78,7 +78,7 @@
         <header class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 bg-gradient-to-r from-slate-900/70 to-slate-800/20 border border-slate-800/60 rounded-2xl">
             <div>
                 <h1 class="text-xl md:text-2xl font-bold tracking-tight text-white font-title flex items-center gap-2">
-                    <span class="bg-gradient-to-r from-brand-400 to-indigo-400 bg-clip-text text-transparent">Extrator & Widget Builder de Depoimentos</span>
+                    <span class="inline-block bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-400 bg-clip-text text-transparent font-extrabold">Extrator & Widget Builder de Depoimentos</span>
                     <span class="text-[10px] font-bold bg-brand-500/10 text-brand-400 px-2 py-0.5 rounded border border-brand-500/20 uppercase">v2.0</span>
                 </h1>
                 <p class="text-xs text-slate-400 mt-1 max-w-xl">
@@ -158,11 +158,20 @@
                                 <div>
                                     <label for="ratingFilter" class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Filtrar por Estrelas</label>
                                     <select id="ratingFilter" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-300 font-medium focus:ring-1 focus:ring-brand-500 focus:outline-none">
-                                        <option value="all" selected>Todas as notas</option>
-                                        <option value="4to5">4 e 5 Estrelas ★★★★☆ +</option>
-                                        <option value="3to5">3 Estrelas ou mais ★★★☆☆ +</option>
-                                        <option value="5">Apenas 5 Estrelas ★★★★★</option>
-                                        <option value="4">Apenas 4 Estrelas ★★★★☆</option>
+                                        <option value="5" selected>5 Estrelas (Padrão)</option>
+                                        <option value="4to5">Acima de 4 Estrelas</option>
+                                        <option value="3to5">Acima de 3 Estrelas</option>
+                                        <option value="2to5">Acima de 2 Estrelas</option>
+                                        <option value="1to5">Acima de 1 Estrela</option>
+                                    </select>
+                                </div>
+
+                                <!-- Sort Selection Dropdown -->
+                                <div>
+                                    <label for="reviewsSortOrder" class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Ordenação das Avaliações</label>
+                                    <select id="reviewsSortOrder" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-300 font-medium focus:ring-1 focus:ring-brand-500 focus:outline-none">
+                                        <option value="most_relevant" selected>Mais Relevantes (Padrão)</option>
+                                        <option value="newest">Mais Recentes</option>
                                     </select>
                                 </div>
 
@@ -283,16 +292,45 @@
                             </select>
                         </div>
 
-                        <!-- Carousel Specific Controls -->
                         <div id="ctrlCarousel" class="hidden bg-slate-950/40 p-3 rounded-xl border border-slate-800/40 space-y-3">
                             <div>
                                 <label for="embedSliderStyle" class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Estilo do Slide</label>
-                                <select id="embedSliderStyle" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs text-slate-300 focus:outline-none">
+                                <select id="embedSliderStyle" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-300 focus:outline-none font-semibold">
                                     <option value="multi" selected>Multicard (Padrão)</option>
                                     <option value="center">Foco Central (Coverflow 3D)</option>
                                     <option value="single">Card Único (Destaque Hero)</option>
                                 </select>
                             </div>
+                            
+                            <!-- Setas de Navegação -->
+                            <div>
+                                <label for="embedSliderArrows" class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Setas de Navegação</label>
+                                <select id="embedSliderArrows" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-300 focus:outline-none font-semibold">
+                                    <option value="side-overlay" selected>Nas Laterais (Sobreposto)</option>
+                                    <option value="top-right">No Topo Direita</option>
+                                    <option value="none">Nenhuma</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Bullets & Scrollbar -->
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Bullets (Pontos)</label>
+                                    <div class="flex bg-slate-900 border border-slate-800 rounded-lg p-0.5">
+                                        <button type="button" id="sliderBulletsOffBtn" class="flex-1 text-[9px] font-bold py-1 rounded bg-brand-500 text-white">Off</button>
+                                        <button type="button" id="sliderBulletsOnBtn" class="flex-1 text-[9px] font-bold py-1 text-slate-400">On</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Barra de Rolagem</label>
+                                    <div class="flex bg-slate-900 border border-slate-800 rounded-lg p-0.5">
+                                        <button type="button" id="sliderScrollbarOffBtn" class="flex-1 text-[9px] font-bold py-1 text-slate-400">Off</button>
+                                        <button type="button" id="sliderScrollbarOnBtn" class="flex-1 text-[9px] font-bold py-1 rounded bg-brand-500 text-white">On</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- AutoPlay & Loop -->
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Auto-rolagem</label>
@@ -302,13 +340,21 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <label for="autoPlaySpeed" class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Velocidade</label>
-                                    <select id="autoPlaySpeed" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs text-slate-300 focus:outline-none">
-                                        <option value="3000">3 segundos</option>
-                                        <option value="5000" selected>5 segundos</option>
-                                        <option value="8000">8 segundos</option>
-                                    </select>
+                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Scroll Infinito (Loop)</label>
+                                    <div class="flex bg-slate-900 border border-slate-800 rounded-lg p-0.5">
+                                        <button type="button" id="sliderLoopOffBtn" class="flex-1 text-[9px] font-bold py-1 text-slate-400">Off</button>
+                                        <button type="button" id="sliderLoopOnBtn" class="flex-1 text-[9px] font-bold py-1 rounded bg-brand-500 text-white">On</button>
+                                    </div>
                                 </div>
+                            </div>
+
+                            <div>
+                                <label for="autoPlaySpeed" class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Velocidade</label>
+                                <select id="autoPlaySpeed" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-300 focus:outline-none font-semibold">
+                                    <option value="3000">3 segundos</option>
+                                    <option value="5000" selected>5 segundos</option>
+                                    <option value="8000">8 segundos</option>
+                                </select>
                             </div>
                         </div>
 

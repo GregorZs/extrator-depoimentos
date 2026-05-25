@@ -262,6 +262,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Carousel options
     let widgetSliderStyle = 'multi'; // 'multi' | 'center' | 'single'
+    let widgetSliderArrows = 'side-overlay'; // 'side-overlay' | 'top-right' | 'none'
+    let widgetSliderBullets = 'off'; // 'on' | 'off'
+    let widgetSliderScrollbar = 'on'; // 'on' | 'off'
+    let widgetSliderLoop = 'on'; // 'on' | 'off'
     let widgetAutoPlay = 'off'; // 'on' | 'off'
     let widgetAutoPlaySpeed = 5000;
     
@@ -686,6 +690,69 @@ document.addEventListener('DOMContentLoaded', () => {
         updateEmbedCode();
     });
 
+    // New slider customization controls listeners
+    const embedSliderArrowsSelect = document.getElementById('embedSliderArrows');
+    const sliderBulletsOffBtn = document.getElementById('sliderBulletsOffBtn');
+    const sliderBulletsOnBtn = document.getElementById('sliderBulletsOnBtn');
+    const sliderScrollbarOffBtn = document.getElementById('sliderScrollbarOffBtn');
+    const sliderScrollbarOnBtn = document.getElementById('sliderScrollbarOnBtn');
+    const sliderLoopOffBtn = document.getElementById('sliderLoopOffBtn');
+    const sliderLoopOnBtn = document.getElementById('sliderLoopOnBtn');
+
+    embedSliderArrowsSelect.addEventListener('change', (e) => {
+        widgetSliderArrows = e.target.value;
+        renderReviewsGrid();
+        updateEmbedCode();
+    });
+
+    sliderBulletsOffBtn.addEventListener('click', () => {
+        widgetSliderBullets = 'off';
+        sliderBulletsOffBtn.className = "flex-1 text-[9px] font-bold py-1 rounded bg-brand-500 text-white";
+        sliderBulletsOnBtn.className = "flex-1 text-[9px] font-bold py-1 text-slate-400";
+        renderReviewsGrid();
+        updateEmbedCode();
+    });
+
+    sliderBulletsOnBtn.addEventListener('click', () => {
+        widgetSliderBullets = 'on';
+        sliderBulletsOnBtn.className = "flex-1 text-[9px] font-bold py-1 rounded bg-brand-500 text-white";
+        sliderBulletsOffBtn.className = "flex-1 text-[9px] font-bold py-1 text-slate-400";
+        renderReviewsGrid();
+        updateEmbedCode();
+    });
+
+    sliderScrollbarOffBtn.addEventListener('click', () => {
+        widgetSliderScrollbar = 'off';
+        sliderScrollbarOffBtn.className = "flex-1 text-[9px] font-bold py-1 rounded bg-brand-500 text-white";
+        sliderScrollbarOnBtn.className = "flex-1 text-[9px] font-bold py-1 text-slate-400";
+        renderReviewsGrid();
+        updateEmbedCode();
+    });
+
+    sliderScrollbarOnBtn.addEventListener('click', () => {
+        widgetSliderScrollbar = 'on';
+        sliderScrollbarOnBtn.className = "flex-1 text-[9px] font-bold py-1 rounded bg-brand-500 text-white";
+        sliderScrollbarOffBtn.className = "flex-1 text-[9px] font-bold py-1 text-slate-400";
+        renderReviewsGrid();
+        updateEmbedCode();
+    });
+
+    sliderLoopOffBtn.addEventListener('click', () => {
+        widgetSliderLoop = 'off';
+        sliderLoopOffBtn.className = "flex-1 text-[9px] font-bold py-1 rounded bg-brand-500 text-white";
+        sliderLoopOnBtn.className = "flex-1 text-[9px] font-bold py-1 text-slate-400";
+        renderReviewsGrid();
+        updateEmbedCode();
+    });
+
+    sliderLoopOnBtn.addEventListener('click', () => {
+        widgetSliderLoop = 'on';
+        sliderLoopOnBtn.className = "flex-1 text-[9px] font-bold py-1 rounded bg-brand-500 text-white";
+        sliderLoopOffBtn.className = "flex-1 text-[9px] font-bold py-1 text-slate-400";
+        renderReviewsGrid();
+        updateEmbedCode();
+    });
+
     // Design parameters triggers
     themeLightBtn.addEventListener('click', () => {
         widgetTheme = 'light';
@@ -1088,6 +1155,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const onlyWithText = onlyWithTextInput.checked;
         const minLength = parseInt(minLengthInput.value, 10) || 0;
         const keywords = keywordsFilterInput.value;
+        const reviewsSortOrderInput = document.getElementById('reviewsSortOrder');
+        const sortBy = reviewsSortOrderInput ? reviewsSortOrderInput.value : 'most_relevant';
 
         try {
             const response = await fetch('/api/scrape', {
@@ -1101,7 +1170,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     ratingFilter,
                     onlyWithText,
                     minLength,
-                    keywords
+                    keywords,
+                    sortBy
                 })
             });
 
@@ -1552,7 +1622,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const roundedRating = Math.round(parseFloat(averageRatingValue));
             for (let i = 1; i <= 5; i++) {
-                ratingStarsHTML += (i <= roundedRating) ? '★' : '☆';
+                if (i <= roundedRating) {
+                    ratingStarsHTML += `<svg class="widget-star-svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+                } else {
+                    ratingStarsHTML += `<svg class="widget-star-svg empty" viewBox="0 0 24 24"><path d="M22 9.24l-7.19-.62L12 2 9.19 8.62 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.37L12 6.1l1.71 4.04 4.38.37-3.32 2.88 1 4.28L12 15.4z"/></svg>`;
+                }
             }
             
             let ratingBlockHTML = '';
@@ -1649,7 +1723,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 <div class="ai-footer">
-                    <span>Média local: ★ ${activeAiSummary.averageRating}</span>
+                    <span>Média local: &#9733; ${activeAiSummary.averageRating}</span>
                     <span>Análise de ${activeAiSummary.totalAnalyzed} depoimentos</span>
                 </div>
             </div>
@@ -1661,7 +1735,11 @@ document.addEventListener('DOMContentLoaded', () => {
         activeReviews.forEach((review, index) => {
             let stars = '';
             for (let i = 1; i <= 5; i++) {
-                stars += (i <= review.rating) ? '★' : '☆';
+                if (i <= review.rating) {
+                    stars += `<svg class="widget-star-svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+                } else {
+                    stars += `<svg class="widget-star-svg empty" viewBox="0 0 24 24"><path d="M22 9.24l-7.19-.62L12 2 9.19 8.62 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.37L12 6.1l1.71 4.04 4.38.37-3.32 2.88 1 4.28L12 15.4z"/></svg>`;
+                }
             }
 
             const avatarMarkup = showAvatars
@@ -1786,18 +1864,53 @@ document.addEventListener('DOMContentLoaded', () => {
             const sliderStyleCss = widgetSliderStyle === 'single' ? 'min-width: 100%; width: 100%;' : 'min-width: 320px; width: 320px;';
             const showNavControls = activeReviews.length > 1;
 
+            const arrowsTopHTML = (widgetSliderArrows === 'top-right' && showNavControls) ? `
+            <div class="slider-nav-arrows">
+                <button type="button" class="nav-arrow-btn prev" id="slider-arrow-prev">&#10094;</button>
+                <button type="button" class="nav-arrow-btn next" id="slider-arrow-next">&#10095;</button>
+            </div>` : '';
+
+            const arrowsSideHTML = (widgetSliderArrows === 'side-overlay' && showNavControls) ? `
+            <button type="button" class="side-arrow-btn prev" id="slider-arrow-prev">&#10094;</button>
+            <button type="button" class="side-arrow-btn next" id="slider-arrow-next">&#10095;</button>` : '';
+
+            const bulletsHTML = (widgetSliderBullets === 'on' && showNavControls) ? `
+            <div class="slider-bullets-container"></div>` : '';
+
             containerHTML = `
             <div class="google-reviews-slider-layout">
-                ${showNavControls ? `
-                <div class="slider-nav-arrows">
-                    <button type="button" class="nav-arrow-btn prev" id="slider-arrow-prev">&#10094;</button>
-                    <button type="button" class="nav-arrow-btn next" id="slider-arrow-next">&#10095;</button>
-                </div>` : ''}
+                ${arrowsTopHTML}
+                ${arrowsSideHTML}
                 <div class="testimonials-slider-viewport">
                     ${aiSummaryCardHTML}
                     ${cardsHTML}
                 </div>
+                ${bulletsHTML}
             </div>`;
+
+            let scrollbarStyles = '';
+            if (widgetSliderScrollbar === 'off') {
+                scrollbarStyles = `
+                .testimonials-slider-viewport {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                }
+                .testimonials-slider-viewport::-webkit-scrollbar {
+                    display: none;
+                }`;
+            } else {
+                scrollbarStyles = `
+                .testimonials-slider-viewport::-webkit-scrollbar {
+                    height: 4px;
+                }
+                .testimonials-slider-viewport::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .testimonials-slider-viewport::-webkit-scrollbar-thumb {
+                    background: ${widgetAccentColor}22;
+                    border-radius: 10px;
+                }`;
+            }
 
             templateCSS = `
             .google-reviews-slider-layout {
@@ -1813,16 +1926,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 scroll-snap-type: x mandatory;
                 padding: 10px 0;
             }
-            .testimonials-slider-viewport::-webkit-scrollbar {
-                height: 4px;
-            }
-            .testimonials-slider-viewport::-webkit-scrollbar-track {
-                background: transparent;
-            }
-            .testimonials-slider-viewport::-webkit-scrollbar-thumb {
-                background: ${widgetAccentColor}22;
-                border-radius: 10px;
-            }
+            ${scrollbarStyles}
             .slide-item {
                 flex-shrink: 0;
                 scroll-snap-align: center;
@@ -1838,7 +1942,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 width: 34px;
                 height: 34px;
                 border-radius: 8px;
-                background: ${cardBgVal};
+                background-color: ${cardBgVal};
                 border: 1px solid ${borderVal};
                 color: ${textMainVal};
                 cursor: pointer;
@@ -1847,11 +1951,78 @@ document.addEventListener('DOMContentLoaded', () => {
                 justify-content: center;
                 font-size: 13px;
                 transition: all 0.2s ease;
+                padding: 0;
             }
             .nav-arrow-btn:hover {
                 background: ${widgetAccentColor};
                 color: #ffffff;
                 border-color: ${widgetAccentColor};
+            }
+            .side-arrow-btn {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                background-color: ${cardBgVal};
+                border: 1px solid ${borderVal};
+                color: ${textMainVal};
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+                transition: all 0.2s;
+                font-size: 12px;
+                padding: 0;
+            }
+            .side-arrow-btn.prev {
+                left: -12px;
+            }
+            .side-arrow-btn.next {
+                right: -12px;
+            }
+            .side-arrow-btn:hover {
+                background-color: ${widgetAccentColor};
+                color: #ffffff;
+                border-color: transparent;
+            }
+            .slider-bullets-container {
+                display: flex;
+                justify-content: center;
+                gap: 6px;
+                margin-top: 14px;
+            }
+            .slider-bullet {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background-color: ${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'};
+                border: none;
+                cursor: pointer;
+                padding: 0;
+                transition: all 0.25s ease;
+            }
+            .slider-bullet.active {
+                background-color: ${widgetAccentColor};
+                transform: scale(1.2);
+            }
+            @media (max-width: 640px) {
+                .reviews-widget-container {
+                    padding: 16px !important;
+                }
+                .slide-item {
+                    min-width: calc(100% - 10px) !important;
+                    width: calc(100% - 10px) !important;
+                }
+                .side-arrow-btn.prev {
+                    left: 2px;
+                }
+                .side-arrow-btn.next {
+                    right: 2px;
+                }
             }`;
         } else if (widgetTemplate === 'list') {
             containerHTML = `
@@ -1874,7 +2045,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const avg = activeAiSummary ? activeAiSummary.averageRating : 5.0;
             const tot = activeAiSummary ? activeAiSummary.totalAnalyzed : activeReviews.length;
             let badgeStars = '';
-            for(let i=0; i<5; i++) badgeStars += (i < Math.round(avg)) ? '★' : '☆';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= Math.round(avg)) {
+                    badgeStars += `<svg class="widget-star-svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+                } else {
+                    badgeStars += `<svg class="widget-star-svg empty" viewBox="0 0 24 24"><path d="M22 9.24l-7.19-.62L12 2 9.19 8.62 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.37L12 6.1l1.71 4.04 4.38.37-3.32 2.88 1 4.28L12 15.4z"/></svg>`;
+                }
+            }
 
             containerHTML = `
             <div class="google-reviews-badge-layout">
@@ -1936,9 +2113,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 color: ${widgetAccentColor};
             }
             .badge-stars {
-                color: ${widgetAccentColor};
-                font-size: 12px;
-                letter-spacing: 1px;
+                display: inline-flex;
+                align-items: center;
+                gap: 1px;
             }
             .badge-text-count {
                 font-size: 9px;
@@ -1949,7 +2126,13 @@ document.addEventListener('DOMContentLoaded', () => {
             // Floating badge preview (rendered layout)
             const avg = activeAiSummary ? activeAiSummary.averageRating : 5.0;
             let badgeStars = '';
-            for(let i=0; i<5; i++) badgeStars += (i < Math.round(avg)) ? '★' : '☆';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= Math.round(avg)) {
+                    badgeStars += `<svg class="widget-star-svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+                } else {
+                    badgeStars += `<svg class="widget-star-svg empty" viewBox="0 0 24 24"><path d="M22 9.24l-7.19-.62L12 2 9.19 8.62 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.37L12 6.1l1.71 4.04 4.38.37-3.32 2.88 1 4.28L12 15.4z"/></svg>`;
+                }
+            }
 
             containerHTML = `
             <div class="google-reviews-floating-widget-wrapper">
@@ -2000,9 +2183,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 flex-direction: column;
             }
             .trigger-stars {
-                color: ${widgetAccentColor};
-                font-size: 10px;
-                letter-spacing: 0.5px;
+                display: inline-flex;
+                align-items: center;
+                gap: 1px;
+            }
+            .trigger-stars .widget-star-svg {
+                width: 11px;
+                height: 11px;
             }
             .trigger-text {
                 font-size: 9px;
@@ -2067,6 +2254,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Shared CSS styling base structure injected into widget block
         const globalCSS = `
+        #google-reviews-widget,
+        #google-reviews-widget *,
+        #google-reviews-widget *::before,
+        #google-reviews-widget *::after {
+            box-sizing: border-box;
+        }
+
         /* Widget Header Styles */
         .widget-header {
             display: flex;
@@ -2104,9 +2298,8 @@ document.addEventListener('DOMContentLoaded', () => {
             color: ${textMainVal};
         }
         .widget-header-stars {
-            color: ${widgetAccentColor};
-            font-size: 14px;
-            letter-spacing: 1.5px;
+            display: inline-flex;
+            align-items: center;
             line-height: 1;
         }
         .widget-header-count {
@@ -2242,11 +2435,25 @@ document.addEventListener('DOMContentLoaded', () => {
             margin-top: 1px;
         }
 
+        /* Star SVGs rules */
+        .widget-star-svg {
+            width: 14px;
+            height: 14px;
+            fill: ${widgetAccentColor};
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 1px;
+            flex-shrink: 0;
+        }
+        .widget-star-svg.empty {
+            fill: ${isDark ? 'rgba(255, 255, 255, 0.18)' : 'rgba(0, 0, 0, 0.15)'};
+        }
+
         .stars-line {
-            color: ${widgetAccentColor};
-            font-size: 11px;
-            letter-spacing: 1.5px;
+            display: flex;
+            align-items: center;
             margin-bottom: 10px;
+            line-height: 1;
         }
 
         .card-body {
@@ -2515,12 +2722,75 @@ document.addEventListener('DOMContentLoaded', () => {
         const nextBtn = widget.querySelector('#slider-arrow-next');
         const viewport = widget.querySelector('.testimonials-slider-viewport');
 
+        const getScrollAmount = () => {
+            const firstCard = viewport.querySelector('.slide-item');
+            const gap = parseFloat(window.getComputedStyle(viewport).gap) || 0;
+            return firstCard ? (firstCard.getBoundingClientRect().width + gap) : 330;
+        };
+
         if (prevBtn && nextBtn && viewport) {
             prevBtn.addEventListener('click', () => {
-                viewport.scrollBy({ left: -330, behavior: 'smooth' });
+                const scrollAmount = getScrollAmount();
+                const loopOn = widgetSliderLoop === 'on';
+                if (viewport.scrollLeft <= 10) {
+                    if (loopOn) {
+                        const maxScroll = viewport.scrollWidth - viewport.clientWidth;
+                        viewport.scrollTo({ left: maxScroll, behavior: 'smooth' });
+                    }
+                } else {
+                    viewport.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+                }
             });
             nextBtn.addEventListener('click', () => {
-                viewport.scrollBy({ left: 330, behavior: 'smooth' });
+                const scrollAmount = getScrollAmount();
+                const loopOn = widgetSliderLoop === 'on';
+                const maxScroll = viewport.scrollWidth - viewport.clientWidth;
+                if (viewport.scrollLeft >= maxScroll - 10) {
+                    if (loopOn) {
+                        viewport.scrollTo({ left: 0, behavior: 'smooth' });
+                    }
+                } else {
+                    viewport.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                }
+            });
+        }
+
+        // Bullets Synchronization
+        const bulletContainer = widget.querySelector('.slider-bullets-container');
+        const slides = viewport ? viewport.querySelectorAll('.slide-item') : [];
+        if (bulletContainer && slides.length > 0 && viewport) {
+            bulletContainer.innerHTML = '';
+            slides.forEach((slide, idx) => {
+                const bullet = document.createElement('button');
+                bullet.type = 'button';
+                bullet.className = 'slider-bullet' + (idx === 0 ? ' active' : '');
+                bullet.setAttribute('aria-label', 'Ir para slide ' + (idx + 1));
+                bullet.addEventListener('click', () => {
+                    const scrollLeftPos = slide.offsetLeft - viewport.offsetLeft;
+                    viewport.scrollTo({ left: scrollLeftPos, behavior: 'smooth' });
+                });
+                bulletContainer.appendChild(bullet);
+            });
+
+            viewport.addEventListener('scroll', () => {
+                const scrollLeft = viewport.scrollLeft;
+                let activeIdx = 0;
+                let minDiff = Infinity;
+                slides.forEach((slide, idx) => {
+                    const diff = Math.abs((slide.offsetLeft - viewport.offsetLeft) - scrollLeft);
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        activeIdx = idx;
+                    }
+                });
+                const bullets = bulletContainer.querySelectorAll('.slider-bullet');
+                bullets.forEach((bullet, idx) => {
+                    if (idx === activeIdx) {
+                        bullet.classList.add('active');
+                    } else {
+                        bullet.classList.remove('active');
+                    }
+                });
             });
         }
 
@@ -2556,19 +2826,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Autoplay Loop execution
         if (viewport && widgetAutoPlay === 'on') {
-            previewCarouselTimer = setInterval(() => {
-                const maxScroll = viewport.scrollWidth - viewport.clientWidth;
-                if (viewport.scrollLeft >= maxScroll - 5) {
-                    viewport.scrollTo({ left: 0, behavior: 'smooth' });
-                } else {
-                    viewport.scrollBy({ left: 330, behavior: 'smooth' });
-                }
-            }, widgetAutoPlaySpeed);
+            const startLoop = () => {
+                if (previewCarouselTimer) return;
+                previewCarouselTimer = setInterval(() => {
+                    const maxScroll = viewport.scrollWidth - viewport.clientWidth;
+                    if (viewport.scrollLeft >= maxScroll - 15) {
+                        if (widgetSliderLoop === 'on') {
+                            viewport.scrollTo({ left: 0, behavior: 'smooth' });
+                        }
+                    } else {
+                        const scrollAmount = getScrollAmount();
+                        viewport.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                    }
+                }, widgetAutoPlaySpeed);
+            };
 
-            // Pause loop on mouse hover
-            const stopLoop = () => clearInterval(previewCarouselTimer);
+            const stopLoop = () => {
+                if (previewCarouselTimer) {
+                    clearInterval(previewCarouselTimer);
+                    previewCarouselTimer = null;
+                }
+            };
+
+            startLoop();
+
+            // Pause loop on mouse hover, resume on leave
             viewport.addEventListener('mouseenter', stopLoop);
-            viewport.addEventListener('touchstart', stopLoop);
+            viewport.addEventListener('mouseleave', startLoop);
+            viewport.addEventListener('touchstart', stopLoop, {passive: true});
+            viewport.addEventListener('touchend', () => {
+                setTimeout(startLoop, 1000);
+            }, {passive: true});
         }
 
         // 2. Read More collapse wire
@@ -2719,157 +3007,247 @@ ${css}
 
 <script>
 (function() {
-    const widget = document.getElementById('google-reviews-widget');
-    if (!widget) return;
+    function initWidget() {
+        const widget = document.getElementById('google-reviews-widget');
+        if (!widget) return false;
 
-    const accentColor = '${widgetAccentColor}';
+        const accentColor = '${widgetAccentColor}';
 
-    // 1. Slider controls navigation (Carrossel)
-    const prevBtn = widget.querySelector('#slider-arrow-prev');
-    const nextBtn = widget.querySelector('#slider-arrow-next');
-    const viewport = widget.querySelector('.testimonials-slider-viewport');
+        // 1. Slider controls navigation (Carrossel)
+        const prevBtn = widget.querySelector('#slider-arrow-prev');
+        const nextBtn = widget.querySelector('#slider-arrow-next');
+        const viewport = widget.querySelector('.testimonials-slider-viewport');
 
-    if (prevBtn && nextBtn && viewport) {
-        prevBtn.addEventListener('click', () => {
-            viewport.scrollBy({ left: -330, behavior: 'smooth' });
-        });
-        nextBtn.addEventListener('click', () => {
-            viewport.scrollBy({ left: 330, behavior: 'smooth' });
-        });
-    }
+        const getScrollAmount = () => {
+            const firstCard = viewport.querySelector('.slide-item');
+            const gap = parseFloat(window.getComputedStyle(viewport).gap) || 0;
+            return firstCard ? (firstCard.getBoundingClientRect().width + gap) : 330;
+        };
 
-    // Coverflow 3D scale implementation
-    const isCenterMode = ${isCenterMode};
-    if (viewport && isCenterMode) {
-        const updateCenterScale = () => {
-            const vCenter = viewport.scrollLeft + (viewport.clientWidth / 2);
-            const cards = viewport.querySelectorAll('.testimonial-card, .ai-summary-card');
-
-            cards.forEach(card => {
-                const cCenter = card.offsetLeft + (card.clientWidth / 2);
-                const dist = Math.abs(vCenter - cCenter);
-                if (dist < 170) {
-                    card.style.transform = 'scale(1.03)';
-                    card.style.opacity = '1';
-                    if (card.classList.contains('testimonial-card')) {
-                        card.style.borderColor = accentColor;
+        if (prevBtn && nextBtn && viewport) {
+            prevBtn.addEventListener('click', () => {
+                const scrollAmount = getScrollAmount();
+                const loopOn = ${widgetSliderLoop === 'on'};
+                if (viewport.scrollLeft <= 10) {
+                    if (loopOn) {
+                        const maxScroll = viewport.scrollWidth - viewport.clientWidth;
+                        viewport.scrollTo({ left: maxScroll, behavior: 'smooth' });
                     }
                 } else {
-                    card.style.transform = 'scale(0.94)';
-                    card.style.opacity = '0.65';
-                    card.style.borderColor = 'rgba(255,255,255,0.08)';
+                    viewport.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
                 }
             });
-        };
-        viewport.addEventListener('scroll', updateCenterScale);
-        setTimeout(updateCenterScale, 150);
-    }
-
-    // Carousel Autoplay script
-    const autoPlayOn = ${autoPlayOn};
-    if (viewport && autoPlayOn) {
-        let timer = setInterval(() => {
-            const maxScroll = viewport.scrollWidth - viewport.clientWidth;
-            if (viewport.scrollLeft >= maxScroll - 5) {
-                viewport.scrollTo({ left: 0, behavior: 'smooth' });
-            } else {
-                viewport.scrollBy({ left: 330, behavior: 'smooth' });
-            }
-        }, ${widgetAutoPlaySpeed});
-
-        const stop = () => clearInterval(timer);
-        viewport.addEventListener('mouseenter', stop);
-        viewport.addEventListener('touchstart', stop);
-    }
-
-    // 2. Read More Text toggling expanders
-    const expanders = widget.querySelectorAll('.read-more-trigger');
-    expanders.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const textPara = e.target.previousElementSibling;
-            const isClamped = textPara.classList.toggle('line-clamp-4');
-            e.target.textContent = isClamped ? 'Ler mais' : 'Ler menos';
-        });
-    });
-
-    // 3. Floating Widget toggles
-    const floatTrigger = widget.querySelector('#floating-widget-trigger');
-    const floatPanel = widget.querySelector('#floating-widget-panel');
-    const floatClose = widget.querySelector('#floating-widget-close');
-
-    if (floatTrigger && floatPanel) {
-        floatTrigger.addEventListener('click', () => {
-            floatPanel.classList.toggle('hidden');
-        });
-    }
-    if (floatClose && floatPanel) {
-        floatClose.addEventListener('click', (e) => {
-            e.stopPropagation();
-            floatPanel.classList.add('hidden');
-        });
-    }
-
-    // 4. Photo Zoom Lightbox logic
-    const reviewsPhotosList = ${JSON.stringify(activeReviews.map(r => r.reviewPhotos || []))};
-    const lboxModal = widget.querySelector('#embed-lightbox-modal');
-    const lboxImg = widget.querySelector('#embed-lightbox-img');
-    const lboxClose = widget.querySelector('#embed-lightbox-close');
-    const lboxPrev = widget.querySelector('#embed-lightbox-prev');
-    const lboxNext = widget.querySelector('#embed-lightbox-next');
-
-    if (lboxModal && lboxImg) {
-        let photoList = [];
-        let photoIdx = 0;
-
-        const thumbs = widget.querySelectorAll('.thumb-photo-item');
-        thumbs.forEach(thumb => {
-            thumb.addEventListener('click', (e) => {
-                const card = e.target.closest('.testimonial-card');
-                const idx = parseInt(card.getAttribute('data-index'), 10);
-                const pIdx = parseInt(e.target.getAttribute('data-idx'), 10);
-
-                photoList = reviewsPhotosList[idx] || [];
-                photoIdx = pIdx;
-
-                lboxImg.src = photoList[photoIdx];
-                lboxModal.classList.remove('hidden');
-                updateArrows();
-            });
-        });
-
-        const close = () => {
-            lboxModal.classList.add('hidden');
-            lboxImg.src = '';
-        };
-
-        if (lboxClose) lboxClose.addEventListener('click', close);
-        lboxModal.addEventListener('click', (e) => {
-            if (e.target === lboxModal) close();
-        });
-
-        const updateArrows = () => {
-            if (!lboxPrev || !lboxNext) return;
-            if (photoList.length > 1) {
-                lboxPrev.style.display = 'block';
-                lboxNext.style.display = 'block';
-            } else {
-                lboxPrev.style.display = 'none';
-                lboxNext.style.display = 'none';
-            }
-        };
-
-        if (lboxPrev) {
-            lboxPrev.addEventListener('click', () => {
-                photoIdx = (photoIdx - 1 + photoList.length) % photoList.length;
-                lboxImg.src = photoList[photoIdx];
+            nextBtn.addEventListener('click', () => {
+                const scrollAmount = getScrollAmount();
+                const loopOn = ${widgetSliderLoop === 'on'};
+                const maxScroll = viewport.scrollWidth - viewport.clientWidth;
+                if (viewport.scrollLeft >= maxScroll - 10) {
+                    if (loopOn) {
+                        viewport.scrollTo({ left: 0, behavior: 'smooth' });
+                    }
+                } else {
+                    viewport.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                }
             });
         }
-        if (lboxNext) {
-            lboxNext.addEventListener('click', () => {
-                photoIdx = (photoIdx + 1) % photoList.length;
-                lboxImg.src = photoList[photoIdx];
+
+        // Bullets Synchronization
+        const bulletContainer = widget.querySelector('.slider-bullets-container');
+        const slides = viewport ? viewport.querySelectorAll('.slide-item') : [];
+        if (bulletContainer && slides.length > 0 && viewport) {
+            bulletContainer.innerHTML = '';
+            slides.forEach((slide, idx) => {
+                const bullet = document.createElement('button');
+                bullet.type = 'button';
+                bullet.className = 'slider-bullet' + (idx === 0 ? ' active' : '');
+                bullet.setAttribute('aria-label', 'Ir para slide ' + (idx + 1));
+                bullet.addEventListener('click', () => {
+                    const scrollLeftPos = slide.offsetLeft - viewport.offsetLeft;
+                    viewport.scrollTo({ left: scrollLeftPos, behavior: 'smooth' });
+                });
+                bulletContainer.appendChild(bullet);
+            });
+
+            viewport.addEventListener('scroll', () => {
+                const scrollLeft = viewport.scrollLeft;
+                let activeIdx = 0;
+                let minDiff = Infinity;
+                slides.forEach((slide, idx) => {
+                    const diff = Math.abs((slide.offsetLeft - viewport.offsetLeft) - scrollLeft);
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        activeIdx = idx;
+                    }
+                });
+                const bullets = bulletContainer.querySelectorAll('.slider-bullet');
+                bullets.forEach((bullet, idx) => {
+                    if (idx === activeIdx) {
+                        bullet.classList.add('active');
+                    } else {
+                        bullet.classList.remove('active');
+                    }
+                });
             });
         }
+
+        // Coverflow 3D scale implementation
+        const isCenterMode = ${isCenterMode};
+        if (viewport && isCenterMode) {
+            const updateCenterScale = () => {
+                const vCenter = viewport.scrollLeft + (viewport.clientWidth / 2);
+                const cards = viewport.querySelectorAll('.testimonial-card, .ai-summary-card');
+
+                cards.forEach(card => {
+                    const cCenter = card.offsetLeft + (card.clientWidth / 2);
+                    const dist = Math.abs(vCenter - cCenter);
+                    if (dist < 170) {
+                        card.style.transform = 'scale(1.03)';
+                        card.style.opacity = '1';
+                        if (card.classList.contains('testimonial-card')) {
+                            card.style.borderColor = accentColor;
+                        }
+                    } else {
+                        card.style.transform = 'scale(0.94)';
+                        card.style.opacity = '0.65';
+                        card.style.borderColor = 'rgba(255,255,255,0.08)';
+                    }
+                });
+            };
+            viewport.addEventListener('scroll', updateCenterScale);
+            setTimeout(updateCenterScale, 150);
+        }
+
+        // Carousel Autoplay script
+        const autoPlayOn = ${autoPlayOn};
+        if (viewport && autoPlayOn) {
+            let timer = null;
+            const startAutoPlay = () => {
+                if (timer) return;
+                timer = setInterval(() => {
+                    const maxScroll = viewport.scrollWidth - viewport.clientWidth;
+                    if (viewport.scrollLeft >= maxScroll - 15) {
+                        if (${widgetSliderLoop === 'on'}) {
+                            viewport.scrollTo({ left: 0, behavior: 'smooth' });
+                        }
+                    } else {
+                        const scrollAmount = getScrollAmount();
+                        viewport.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                    }
+                }, ${widgetAutoPlaySpeed});
+            };
+
+            const stopAutoPlay = () => {
+                if (timer) {
+                    clearInterval(timer);
+                    timer = null;
+                }
+            };
+
+            startAutoPlay();
+
+            // Pause loop on mouse hover, resume on leave
+            viewport.addEventListener('mouseenter', stopAutoPlay);
+            viewport.addEventListener('mouseleave', startAutoPlay);
+            viewport.addEventListener('touchstart', stopAutoPlay, {passive: true});
+            viewport.addEventListener('touchend', () => {
+                setTimeout(startAutoPlay, 1000);
+            }, {passive: true});
+        }
+
+        // 2. Read More Text toggling expanders
+        const expanders = widget.querySelectorAll('.read-more-trigger');
+        expanders.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const textPara = e.target.previousElementSibling;
+                const isClamped = textPara.classList.toggle('line-clamp-4');
+                e.target.textContent = isClamped ? 'Ler mais' : 'Ler menos';
+            });
+        });
+
+        // 3. Floating Widget toggles
+        const floatTrigger = widget.querySelector('#floating-widget-trigger');
+        const floatPanel = widget.querySelector('#floating-widget-panel');
+        const floatClose = widget.querySelector('#floating-widget-close');
+
+        if (floatTrigger && floatPanel) {
+            floatTrigger.addEventListener('click', () => {
+                floatPanel.classList.toggle('hidden');
+            });
+        }
+        if (floatClose && floatPanel) {
+            floatClose.addEventListener('click', (e) => {
+                e.stopPropagation();
+                floatPanel.classList.add('hidden');
+            });
+        }
+
+        // 4. Photo Zoom Lightbox logic
+        const reviewsPhotosList = ${JSON.stringify(activeReviews.map(r => r.reviewPhotos || []))};
+        const lboxModal = widget.querySelector('#embed-lightbox-modal');
+        const lboxImg = widget.querySelector('#embed-lightbox-img');
+        const lboxClose = widget.querySelector('#embed-lightbox-close');
+        const lboxPrev = widget.querySelector('#embed-lightbox-prev');
+        const lboxNext = widget.querySelector('#embed-lightbox-next');
+
+        if (lboxModal && lboxImg) {
+            let photoList = [];
+            let photoIdx = 0;
+
+            const thumbs = widget.querySelectorAll('.thumb-photo-item');
+            thumbs.forEach(thumb => {
+                thumb.addEventListener('click', (e) => {
+                    const card = e.target.closest('.testimonial-card');
+                    const idx = parseInt(card.getAttribute('data-index'), 10);
+                    const pIdx = parseInt(e.target.getAttribute('data-idx'), 10);
+
+                    photoList = reviewsPhotosList[idx] || [];
+                    photoIdx = pIdx;
+
+                    lboxImg.src = photoList[photoIdx];
+                    lboxModal.classList.remove('hidden');
+                    updateArrows();
+                });
+            });
+
+            const close = () => {
+                lboxModal.classList.add('hidden');
+                lboxImg.src = '';
+            };
+
+            if (lboxClose) lboxClose.addEventListener('click', close);
+            lboxModal.addEventListener('click', (e) => {
+                if (e.target === lboxModal) close();
+            });
+
+            const updateArrows = () => {
+                if (!lboxPrev || !lboxNext) return;
+                if (photoList.length > 1) {
+                    lboxPrev.style.display = 'block';
+                    lboxNext.style.display = 'block';
+                } else {
+                    lboxPrev.style.display = 'none';
+                    lboxNext.style.display = 'none';
+                }
+            };
+
+            if (lboxPrev) {
+                lboxPrev.addEventListener('click', () => {
+                    photoIdx = (photoIdx - 1 + photoList.length) % photoList.length;
+                    lboxImg.src = photoList[photoIdx];
+                });
+            }
+            if (lboxNext) {
+                lboxNext.addEventListener('click', () => {
+                    photoIdx = (photoIdx + 1) % photoList.length;
+                    lboxImg.src = photoList[photoIdx];
+                });
+            }
+        }
+        return true;
+    }
+
+    if (!initWidget()) {
+        document.addEventListener('DOMContentLoaded', initWidget);
     }
 })();
 <\/script>`;
@@ -2980,157 +3358,247 @@ ${css}
 
     <script>
     (function() {
-        const widget = document.getElementById('google-reviews-widget');
-        if (!widget) return;
+        function initWidget() {
+            const widget = document.getElementById('google-reviews-widget');
+            if (!widget) return false;
 
-        const accentColor = '${widgetAccentColor}';
+            const accentColor = '${widgetAccentColor}';
 
-        // 1. Slider controls navigation (Carrossel)
-        const prevBtn = widget.querySelector('#slider-arrow-prev');
-        const nextBtn = widget.querySelector('#slider-arrow-next');
-        const viewport = widget.querySelector('.testimonials-slider-viewport');
+            // 1. Slider controls navigation (Carrossel)
+            const prevBtn = widget.querySelector('#slider-arrow-prev');
+            const nextBtn = widget.querySelector('#slider-arrow-next');
+            const viewport = widget.querySelector('.testimonials-slider-viewport');
 
-        if (prevBtn && nextBtn && viewport) {
-            prevBtn.addEventListener('click', () => {
-                viewport.scrollBy({ left: -330, behavior: 'smooth' });
-            });
-            nextBtn.addEventListener('click', () => {
-                viewport.scrollBy({ left: 330, behavior: 'smooth' });
-            });
-        }
+            const getScrollAmount = () => {
+                const firstCard = viewport.querySelector('.slide-item');
+                const gap = parseFloat(window.getComputedStyle(viewport).gap) || 0;
+                return firstCard ? (firstCard.getBoundingClientRect().width + gap) : 330;
+            };
 
-        // Coverflow 3D scale implementation
-        const isCenterMode = ${isCenterMode};
-        if (viewport && isCenterMode) {
-            const updateCenterScale = () => {
-                const vCenter = viewport.scrollLeft + (viewport.clientWidth / 2);
-                const cards = viewport.querySelectorAll('.testimonial-card, .ai-summary-card');
-
-                cards.forEach(card => {
-                    const cCenter = card.offsetLeft + (card.clientWidth / 2);
-                    const dist = Math.abs(vCenter - cCenter);
-                    if (dist < 170) {
-                        card.style.transform = 'scale(1.03)';
-                        card.style.opacity = '1';
-                        if (card.classList.contains('testimonial-card')) {
-                            card.style.borderColor = accentColor;
+            if (prevBtn && nextBtn && viewport) {
+                prevBtn.addEventListener('click', () => {
+                    const scrollAmount = getScrollAmount();
+                    const loopOn = ${widgetSliderLoop === 'on'};
+                    if (viewport.scrollLeft <= 10) {
+                        if (loopOn) {
+                            const maxScroll = viewport.scrollWidth - viewport.clientWidth;
+                            viewport.scrollTo({ left: maxScroll, behavior: 'smooth' });
                         }
                     } else {
-                        card.style.transform = 'scale(0.94)';
-                        card.style.opacity = '0.65';
-                        card.style.borderColor = 'rgba(255,255,255,0.08)';
+                        viewport.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
                     }
                 });
-            };
-            viewport.addEventListener('scroll', updateCenterScale);
-            setTimeout(updateCenterScale, 150);
-        }
-
-        // Carousel Autoplay script
-        const autoPlayOn = ${autoPlayOn};
-        if (viewport && autoPlayOn) {
-            let timer = setInterval(() => {
-                const maxScroll = viewport.scrollWidth - viewport.clientWidth;
-                if (viewport.scrollLeft >= maxScroll - 5) {
-                    viewport.scrollTo({ left: 0, behavior: 'smooth' });
-                } else {
-                    viewport.scrollBy({ left: 330, behavior: 'smooth' });
-                }
-            }, ${widgetAutoPlaySpeed});
-
-            const stop = () => clearInterval(timer);
-            viewport.addEventListener('mouseenter', stop);
-            viewport.addEventListener('touchstart', stop);
-        }
-
-        // 2. Read More Text toggling expanders
-        const expanders = widget.querySelectorAll('.read-more-trigger');
-        expanders.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const textPara = e.target.previousElementSibling;
-                const isClamped = textPara.classList.toggle('line-clamp-4');
-                e.target.textContent = isClamped ? 'Ler mais' : 'Ler menos';
-            });
-        });
-
-        // 3. Floating Widget toggles
-        const floatTrigger = widget.querySelector('#floating-widget-trigger');
-        const floatPanel = widget.querySelector('#floating-widget-panel');
-        const floatClose = widget.querySelector('#floating-widget-close');
-
-        if (floatTrigger && floatPanel) {
-            floatTrigger.addEventListener('click', () => {
-                floatPanel.classList.toggle('hidden');
-            });
-        }
-        if (floatClose && floatPanel) {
-            floatClose.addEventListener('click', (e) => {
-                e.stopPropagation();
-                floatPanel.classList.add('hidden');
-            });
-        }
-
-        // 4. Photo Zoom Lightbox logic
-        const reviewsPhotosList = ${JSON.stringify(activeReviews.map(r => r.reviewPhotos || []))};
-        const lboxModal = widget.querySelector('#embed-lightbox-modal');
-        const lboxImg = widget.querySelector('#embed-lightbox-img');
-        const lboxClose = widget.querySelector('#embed-lightbox-close');
-        const lboxPrev = widget.querySelector('#embed-lightbox-prev');
-        const lboxNext = widget.querySelector('#embed-lightbox-next');
-
-        if (lboxModal && lboxImg) {
-            let photoList = [];
-            let photoIdx = 0;
-
-            const thumbs = widget.querySelectorAll('.thumb-photo-item');
-            thumbs.forEach(thumb => {
-                thumb.addEventListener('click', (e) => {
-                    const card = e.target.closest('.testimonial-card');
-                    const idx = parseInt(card.getAttribute('data-index'), 10);
-                    const pIdx = parseInt(e.target.getAttribute('data-idx'), 10);
-
-                    photoList = reviewsPhotosList[idx] || [];
-                    photoIdx = pIdx;
-
-                    lboxImg.src = photoList[photoIdx];
-                    lboxModal.classList.remove('hidden');
-                    updateArrows();
-                });
-            });
-
-            const close = () => {
-                lboxModal.classList.add('hidden');
-                lboxImg.src = '';
-            };
-
-            if (lboxClose) lboxClose.addEventListener('click', close);
-            lboxModal.addEventListener('click', (e) => {
-                if (e.target === lboxModal) close();
-            });
-
-            const updateArrows = () => {
-                if (!lboxPrev || !lboxNext) return;
-                if (photoList.length > 1) {
-                    lboxPrev.style.display = 'block';
-                    lboxNext.style.display = 'block';
-                } else {
-                    lboxPrev.style.display = 'none';
-                    lboxNext.style.display = 'none';
-                }
-            };
-
-            if (lboxPrev) {
-                lboxPrev.addEventListener('click', () => {
-                    photoIdx = (photoIdx - 1 + photoList.length) % photoList.length;
-                    lboxImg.src = photoList[photoIdx];
+                nextBtn.addEventListener('click', () => {
+                    const scrollAmount = getScrollAmount();
+                    const loopOn = ${widgetSliderLoop === 'on'};
+                    const maxScroll = viewport.scrollWidth - viewport.clientWidth;
+                    if (viewport.scrollLeft >= maxScroll - 10) {
+                        if (loopOn) {
+                            viewport.scrollTo({ left: 0, behavior: 'smooth' });
+                        }
+                    } else {
+                        viewport.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                    }
                 });
             }
-            if (lboxNext) {
-                lboxNext.addEventListener('click', () => {
-                    photoIdx = (photoIdx + 1) % photoList.length;
-                    lboxImg.src = photoList[photoIdx];
+
+            // Bullets Synchronization
+            const bulletContainer = widget.querySelector('.slider-bullets-container');
+            const slides = viewport ? viewport.querySelectorAll('.slide-item') : [];
+            if (bulletContainer && slides.length > 0 && viewport) {
+                bulletContainer.innerHTML = '';
+                slides.forEach((slide, idx) => {
+                    const bullet = document.createElement('button');
+                    bullet.type = 'button';
+                    bullet.className = 'slider-bullet' + (idx === 0 ? ' active' : '');
+                    bullet.setAttribute('aria-label', 'Ir para slide ' + (idx + 1));
+                    bullet.addEventListener('click', () => {
+                        const scrollLeftPos = slide.offsetLeft - viewport.offsetLeft;
+                        viewport.scrollTo({ left: scrollLeftPos, behavior: 'smooth' });
+                    });
+                    bulletContainer.appendChild(bullet);
+                });
+
+                viewport.addEventListener('scroll', () => {
+                    const scrollLeft = viewport.scrollLeft;
+                    let activeIdx = 0;
+                    let minDiff = Infinity;
+                    slides.forEach((slide, idx) => {
+                        const diff = Math.abs((slide.offsetLeft - viewport.offsetLeft) - scrollLeft);
+                        if (diff < minDiff) {
+                            minDiff = diff;
+                            activeIdx = idx;
+                        }
+                    });
+                    const bullets = bulletContainer.querySelectorAll('.slider-bullet');
+                    bullets.forEach((bullet, idx) => {
+                        if (idx === activeIdx) {
+                            bullet.classList.add('active');
+                        } else {
+                            bullet.classList.remove('active');
+                        }
+                    });
                 });
             }
+
+            // Coverflow 3D scale implementation
+            const isCenterMode = ${isCenterMode};
+            if (viewport && isCenterMode) {
+                const updateCenterScale = () => {
+                    const vCenter = viewport.scrollLeft + (viewport.clientWidth / 2);
+                    const cards = viewport.querySelectorAll('.testimonial-card, .ai-summary-card');
+
+                    cards.forEach(card => {
+                        const cCenter = card.offsetLeft + (card.clientWidth / 2);
+                        const dist = Math.abs(vCenter - cCenter);
+                        if (dist < 170) {
+                            card.style.transform = 'scale(1.03)';
+                            card.style.opacity = '1';
+                            if (card.classList.contains('testimonial-card')) {
+                                card.style.borderColor = accentColor;
+                            }
+                        } else {
+                            card.style.transform = 'scale(0.94)';
+                            card.style.opacity = '0.65';
+                            card.style.borderColor = 'rgba(255,255,255,0.08)';
+                        }
+                    });
+                };
+                viewport.addEventListener('scroll', updateCenterScale);
+                setTimeout(updateCenterScale, 150);
+            }
+
+            // Carousel Autoplay script
+            const autoPlayOn = ${autoPlayOn};
+            if (viewport && autoPlayOn) {
+                let timer = null;
+                const startAutoPlay = () => {
+                    if (timer) return;
+                    timer = setInterval(() => {
+                        const maxScroll = viewport.scrollWidth - viewport.clientWidth;
+                        if (viewport.scrollLeft >= maxScroll - 15) {
+                            if (${widgetSliderLoop === 'on'}) {
+                                viewport.scrollTo({ left: 0, behavior: 'smooth' });
+                            }
+                        } else {
+                            const scrollAmount = getScrollAmount();
+                            viewport.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                        }
+                    }, ${widgetAutoPlaySpeed});
+                };
+
+                const stopAutoPlay = () => {
+                    if (timer) {
+                        clearInterval(timer);
+                        timer = null;
+                    }
+                };
+
+                startAutoPlay();
+
+                // Pause loop on mouse hover, resume on leave
+                viewport.addEventListener('mouseenter', stopAutoPlay);
+                viewport.addEventListener('mouseleave', startAutoPlay);
+                viewport.addEventListener('touchstart', stopAutoPlay, {passive: true});
+                viewport.addEventListener('touchend', () => {
+                    setTimeout(startAutoPlay, 1000);
+                }, {passive: true});
+            }
+
+            // 2. Read More Text toggling expanders
+            const expanders = widget.querySelectorAll('.read-more-trigger');
+            expanders.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const textPara = e.target.previousElementSibling;
+                    const isClamped = textPara.classList.toggle('line-clamp-4');
+                    e.target.textContent = isClamped ? 'Ler mais' : 'Ler menos';
+                });
+            });
+
+            // 3. Floating Widget toggles
+            const floatTrigger = widget.querySelector('#floating-widget-trigger');
+            const floatPanel = widget.querySelector('#floating-widget-panel');
+            const floatClose = widget.querySelector('#floating-widget-close');
+
+            if (floatTrigger && floatPanel) {
+                floatTrigger.addEventListener('click', () => {
+                    floatPanel.classList.toggle('hidden');
+                });
+            }
+            if (floatClose && floatPanel) {
+                floatClose.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    floatPanel.classList.add('hidden');
+                });
+            }
+
+            // 4. Photo Zoom Lightbox logic
+            const reviewsPhotosList = ${JSON.stringify(activeReviews.map(r => r.reviewPhotos || []))};
+            const lboxModal = widget.querySelector('#embed-lightbox-modal');
+            const lboxImg = widget.querySelector('#embed-lightbox-img');
+            const lboxClose = widget.querySelector('#embed-lightbox-close');
+            const lboxPrev = widget.querySelector('#embed-lightbox-prev');
+            const lboxNext = widget.querySelector('#embed-lightbox-next');
+
+            if (lboxModal && lboxImg) {
+                let photoList = [];
+                let photoIdx = 0;
+
+                const thumbs = widget.querySelectorAll('.thumb-photo-item');
+                thumbs.forEach(thumb => {
+                    thumb.addEventListener('click', (e) => {
+                        const card = e.target.closest('.testimonial-card');
+                        const idx = parseInt(card.getAttribute('data-index'), 10);
+                        const pIdx = parseInt(e.target.getAttribute('data-idx'), 10);
+
+                        photoList = reviewsPhotosList[idx] || [];
+                        photoIdx = pIdx;
+
+                        lboxImg.src = photoList[photoIdx];
+                        lboxModal.classList.remove('hidden');
+                        updateArrows();
+                    });
+                });
+
+                const close = () => {
+                    lboxModal.classList.add('hidden');
+                    lboxImg.src = '';
+                };
+
+                if (lboxClose) lboxClose.addEventListener('click', close);
+                lboxModal.addEventListener('click', (e) => {
+                    if (e.target === lboxModal) close();
+                });
+
+                const updateArrows = () => {
+                    if (!lboxPrev || !lboxNext) return;
+                    if (photoList.length > 1) {
+                        lboxPrev.style.display = 'block';
+                        lboxNext.style.display = 'block';
+                    } else {
+                        lboxPrev.style.display = 'none';
+                        lboxNext.style.display = 'none';
+                    }
+                };
+
+                if (lboxPrev) {
+                    lboxPrev.addEventListener('click', () => {
+                        photoIdx = (photoIdx - 1 + photoList.length) % photoList.length;
+                        lboxImg.src = photoList[photoIdx];
+                    });
+                }
+                if (lboxNext) {
+                    lboxNext.addEventListener('click', () => {
+                        photoIdx = (photoIdx + 1) % photoList.length;
+                        lboxImg.src = photoList[photoIdx];
+                    });
+                }
+            }
+            return true;
+        }
+
+        if (!initWidget()) {
+            document.addEventListener('DOMContentLoaded', initWidget);
         }
     })();
     </script>

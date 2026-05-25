@@ -21,7 +21,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.post('/api/scrape', async (req, res) => {
-    const { url, maxReviews = 10, ratingFilter = 'all', onlyWithText = false, minLength = 0, keywords = '' } = req.body;
+    const { url, maxReviews = 10, ratingFilter = 'all', onlyWithText = false, minLength = 0, keywords = '', sortBy = 'most_relevant' } = req.body;
 
     if (!url || !url.includes('google.com/maps')) {
         return res.status(400).json({ error: 'Por favor, forneça uma URL válida do Google Maps.' });
@@ -220,6 +220,38 @@ app.post('/api/scrape', async (req, res) => {
         
         // Aguarda transição
         await new Promise(r => setTimeout(r, 4000));
+
+        // Ordenação por "Mais Recentes" se solicitado
+        if (sortBy === 'newest') {
+            console.log("[Scraper] Tentando ordenar por Mais Recentes...");
+            const sorted = await page.evaluate(async () => {
+                const sortBtn = Array.from(document.querySelectorAll('button')).find(b => {
+                    const txt = b.textContent.trim().toLowerCase();
+                    return txt.includes('ordenar') || txt.includes('sort') || b.getAttribute('aria-label')?.toLowerCase().includes('ordenar');
+                });
+                
+                if (!sortBtn) return false;
+                sortBtn.click();
+                
+                await new Promise(r => setTimeout(r, 1500));
+                
+                const menuItems = Array.from(document.querySelectorAll('div[role="menuitem"], div[role="menuitemradio"], button, span, a'));
+                const recentItem = menuItems.find(el => {
+                    const txt = el.textContent.trim().toLowerCase();
+                    return txt === 'mais recentes' || txt === 'newest' || txt.includes('recentes');
+                });
+                
+                if (recentItem) {
+                    recentItem.click();
+                    return true;
+                }
+                return false;
+            });
+            console.log(`[Scraper] Ordenação por mais recentes aplicada? ${sorted ? 'Sim' : 'Não'}`);
+            if (sorted) {
+                await new Promise(r => setTimeout(r, 4000));
+            }
+        }
         
         // Verifica se carregou algum depoimento inicial
         const initialCount = await page.evaluate(() => document.querySelectorAll('.jftiEf').length);
@@ -360,6 +392,10 @@ app.post('/api/scrape', async (req, res) => {
                 reviews = reviews.filter(r => r.rating >= 4);
             } else if (ratingFilter === '3to5') {
                 reviews = reviews.filter(r => r.rating >= 3);
+            } else if (ratingFilter === '2to5') {
+                reviews = reviews.filter(r => r.rating >= 2);
+            } else if (ratingFilter === '1to5') {
+                reviews = reviews.filter(r => r.rating >= 1);
             } else {
                 const targetRating = parseInt(ratingFilter, 10);
                 reviews = reviews.filter(r => r.rating === targetRating);
