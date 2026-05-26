@@ -1362,7 +1362,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 2. Sort locally
         const sortVal = curationSortSelect.value;
-        if (sortVal === 'stars-desc') {
+        if (sortVal === 'reverse') {
+            list.reverse();
+        } else if (sortVal === 'stars-desc') {
             list.sort((a, b) => b.review.rating - a.review.rating);
         } else if (sortVal === 'stars-asc') {
             list.sort((a, b) => a.review.rating - b.review.rating);
@@ -1514,7 +1516,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Apply same sorting configuration as the curation panel
         const sortVal = curationSortSelect.value;
-        if (sortVal === 'stars-desc') {
+        if (sortVal === 'reverse') {
+            activeList.reverse();
+        } else if (sortVal === 'stars-desc') {
             activeList.sort((a, b) => b.review.rating - a.review.rating);
         } else if (sortVal === 'stars-asc') {
             activeList.sort((a, b) => a.review.rating - b.review.rating);
@@ -3732,6 +3736,92 @@ ${css}
         link.click();
         document.body.removeChild(link);
     });
+
+    // -------------------------------------------------------------
+    // Automation Controls
+    // -------------------------------------------------------------
+    const automationToggle = document.getElementById('automationToggle');
+    const automationPanel = document.getElementById('automationPanel');
+    const automationSchedule = document.getElementById('automationSchedule');
+    const btnSaveAutomation = document.getElementById('btnSaveAutomation');
+    const btnRunNow = document.getElementById('btnRunNow');
+    const automationStatusMsg = document.getElementById('automationStatusMsg');
+
+    if (automationToggle) {
+        fetch('/api/automation')
+            .then(res => res.json())
+            .then(data => {
+                if (data.enabled) {
+                    automationToggle.checked = true;
+                    automationPanel.classList.remove('opacity-50', 'pointer-events-none');
+                }
+                if (data.schedule) {
+                    automationSchedule.value = data.schedule;
+                }
+            })
+            .catch(err => console.error("Erro ao carregar cron:", err));
+
+        automationToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                automationPanel.classList.remove('opacity-50', 'pointer-events-none');
+            } else {
+                automationPanel.classList.add('opacity-50', 'pointer-events-none');
+                saveAutomationConfig();
+            }
+        });
+
+        btnSaveAutomation.addEventListener('click', () => {
+            saveAutomationConfig();
+        });
+
+        function saveAutomationConfig() {
+            const config = {
+                enabled: automationToggle.checked,
+                schedule: automationSchedule.value,
+                scrapeConfig: {
+                    url: urlInput.value.trim(),
+                    maxReviews: parseInt(maxReviewsInput.value, 10),
+                    ratingFilter: ratingFilterInput.value,
+                    onlyWithText: onlyWithTextInput.checked,
+                    minLength: parseInt(minLengthInput.value, 10) || 0,
+                    keywords: keywordsFilterInput.value,
+                    sortBy: document.getElementById('reviewsSortOrder') ? document.getElementById('reviewsSortOrder').value : 'most_relevant'
+                }
+            };
+
+            automationStatusMsg.textContent = 'Salvando...';
+            automationStatusMsg.classList.remove('hidden', 'text-emerald-400', 'text-red-400');
+            automationStatusMsg.classList.add('text-slate-400');
+
+            fetch('/api/automation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(config)
+            })
+            .then(res => res.json())
+            .then(data => {
+                automationStatusMsg.textContent = 'Salvo com sucesso!';
+                automationStatusMsg.classList.replace('text-slate-400', 'text-emerald-400');
+                setTimeout(() => automationStatusMsg.classList.add('hidden'), 3000);
+            })
+            .catch(err => {
+                automationStatusMsg.textContent = 'Erro ao salvar!';
+                automationStatusMsg.classList.replace('text-slate-400', 'text-red-400');
+                setTimeout(() => automationStatusMsg.classList.add('hidden'), 3000);
+            });
+        }
+
+        btnRunNow.addEventListener('click', () => {
+            if (!urlInput.value.trim()) {
+                automationStatusMsg.textContent = 'Preencha a URL antes!';
+                automationStatusMsg.classList.remove('hidden');
+                automationStatusMsg.classList.add('text-red-400');
+                setTimeout(() => automationStatusMsg.classList.add('hidden'), 3000);
+                return;
+            }
+            form.dispatchEvent(new Event('submit'));
+        });
+    }
 
     // -------------------------------------------------------------
     // Application Startups

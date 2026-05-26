@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const cron = require('node-cron');
 
 const puppeteer = process.env.RENDER ? require('puppeteer-core') : require('puppeteer');
 let chromium;
@@ -30,11 +31,63 @@ app.get('/depoimentos.json', (req, res) => {
     }
 });
 
-app.post('/api/scrape', async (req, res) => {
-    const { url, maxReviews = 10, ratingFilter = 'all', onlyWithText = false, minLength = 0, keywords = '', sortBy = 'most_relevant' } = req.body;
+const CRON_CONFIG_PATH = path.join(__dirname, 'cron_config.json');
+let activeCronJob = null;
+
+function loadCronConfig() {
+    if (fs.existsSync(CRON_CONFIG_PATH)) {
+        try {
+            return JSON.parse(fs.readFileSync(CRON_CONFIG_PATH, 'utf-8'));
+        } catch (e) {
+            return { enabled: false, schedule: '0 0 * * *', scrapeConfig: {} };
+        }
+    }
+    return { enabled: false, schedule: '0 0 * * *', scrapeConfig: {} };
+}
+
+function saveCronConfig(config) {
+    fs.writeFileSync(CRON_CONFIG_PATH, JSON.stringify(config, null, 2), 'utf-8');
+}
+
+function scheduleCron() {
+    if (activeCronJob) {
+        activeCronJob.stop();
+        activeCronJob = null;
+    }
+    const config = loadCronConfig();
+    if (config.enabled && config.schedule) {
+        console.log(`[Cron] Agendando automação para: ${config.schedule}`);
+        activeCronJob = cron.schedule(config.schedule, async () => {
+            console.log(`[Cron] Iniciando execução agendada...`);
+            try {
+                await runScraper(config.scrapeConfig);
+                console.log(`[Cron] Execução agendada concluída com sucesso.`);
+            } catch (error) {
+                console.error(`[Cron] Erro na execução agendada:`, error.message);
+            }
+        });
+    } else {
+        console.log(`[Cron] Automação desativada ou sem agendamento.`);
+    }
+}
+
+// Rotas da Automação
+app.get('/api/automation', (req, res) => {
+    res.json(loadCronConfig());
+});
+
+app.post('/api/automation', (req, res) => {
+    const newConfig = req.body;
+    saveCronConfig(newConfig);
+    scheduleCron();
+    res.json({ success: true, message: 'Configuração salva com sucesso.', config: newConfig });
+});
+
+async function runScraper(config) {
+    const { url, maxReviews = 10, ratingFilter = 'all', onlyWithText = false, minLength = 0, keywords = '', sortBy = 'most_relevant' } = config;
 
     if (!url) {
-        return res.status(400).json({ error: 'Por favor, forneça uma URL do Google Maps ou o nome da empresa.' });
+        throw new Error('Por favor, forneça uma URL do Google Maps ou o nome da empresa.');
     }
 
     let targetUrl = url.trim();
@@ -42,7 +95,7 @@ app.post('/api/scrape', async (req, res) => {
 
     if (isUrl) {
         if (!targetUrl.includes('google.com/maps') && !targetUrl.includes('maps.app.goo.gl') && !targetUrl.includes('google.com/local')) {
-            return res.status(400).json({ error: 'Por favor, forneça uma URL válida do Google Maps.' });
+            throw new Error('Por favor, forneça uma URL válida do Google Maps.');
         }
     } else {
         // Se não for uma URL, assume ser o nome da empresa
@@ -193,6 +246,12 @@ app.post('/api/scrape', async (req, res) => {
         
         console.log(`[Scraper] Aba clicada diretamente? ${tabClicked ? 'Sim (' + tabClicked + ')' : 'Não'}`);
         
+        const reviewsAlreadyVisible = await page.evaluate(() => document.querySelectorAll('.jftiEf').length > 0);
+        if (reviewsAlreadyVisible) {
+            console.log("[Scraper] Depoimentos já estão visíveis na página (URL abriu direto neles). Ignorando fallback.");
+            tabClicked = "already_visible";
+        }
+
         // Fallback: Se a aba não foi encontrada diretamente (ex: URL de coordenadas direta sem detalhes),
         // resolvemos o nome do negócio e fazemos a pesquisa limpa
         if (!tabClicked) {
@@ -337,18 +396,156 @@ app.post('/api/scrape', async (req, res) => {
         const initialCount = await page.evaluate(() => document.querySelectorAll('.jftiEf').length);
         console.log(`[Scraper] Depoimentos iniciais carregados: ${initialCount}`);
         
-        // Loop de rolagem infinita baseada no limite solicitado (maxReviews)
-        let previousCount = initialCount;
+                // Loop de rolagem inteligente com extração contínua e filtros aplicados na hora
+        const allExtractedReviews = new Map(); // name+text -> review
         let noChangeCount = 0;
-        const maxScrolls = 20; // limite de segurança
+        let previousValidCount = 0;
+        const maxScrolls = 80; 
         
-        console.log(`[Scraper] Iniciando rolagem de feed para obter até ${maxReviews} depoimentos...`);
+        console.log(`[Scraper] Iniciando rolagem de feed para obter até ${maxReviews} depoimentos válidos...`);
         for (let i = 1; i <= maxScrolls; i++) {
-            if (previousCount >= maxReviews) {
-                console.log(`[Scraper] Meta alcançada ou excedida (${previousCount} >= ${maxReviews}). Parando rolagens.`);
-                break;
+            
+            // Extrair os depoimentos presentes no DOM agora
+            const chunkReviews = await page.evaluate(() => {
+                const cards = document.querySelectorAll('.jftiEf');
+                return Array.from(cards).map((card, cardIdx) => {
+                    const nameEl = card.querySelector('.d4r55');
+                    const textEl = card.querySelector('.wiI7pd');
+                    const ratingEl = card.querySelector('.kvMYJc');
+                    const imgEl = card.querySelector('.NBa7we') || card.querySelector('img');
+                    const dateEl = card.querySelector('.rsqaWe') || card.querySelector('.rsqaAc');
+                    
+                    let rating = 5;
+                    if (ratingEl) {
+                        const label = ratingEl.getAttribute('aria-label') || '';
+                        const m = label.match(/\d+/);
+                        if (m) rating = parseInt(m[0], 10);
+                    }
+                    
+                    const photoButtons = card.querySelectorAll('button.Tya61d');
+                    const reviewPhotos = Array.from(photoButtons).map(btn => {
+                        const bg = window.getComputedStyle(btn).backgroundImage;
+                        if (bg && bg !== 'none') {
+                            let cleanUrl = bg.replace(/^url\(['"]?/, '').replace(/['"]?\)$/, '');
+                            const isGooglePhoto = /googleusercontent\.com|ggpht\.com|lh\d+\.google\.com/.test(cleanUrl);
+                            if (isGooglePhoto && cleanUrl.includes('=')) {
+                                const parts = cleanUrl.split('=');
+                                let param = parts[parts.length - 1];
+                                const segments = param.split('-');
+                                if (segments.length > 0 && (segments[0].match(/^(w|s)\d+$/) || segments[0] === 's0')) {
+                                    const remaining = segments.filter(seg => {
+                                        if (seg.match(/^w\d+$/)) return false;
+                                        if (seg.match(/^h\d+$/)) return false;
+                                        if (seg === 'p' || seg === 'n') return false;
+                                        if (seg.match(/^s\d+$/)) return false;
+                                        return true;
+                                    });
+                                    param = ['s0', ...remaining].join('-');
+                                    parts[parts.length - 1] = param;
+                                    cleanUrl = parts.join('=');
+                                }
+                            }
+                            return cleanUrl;
+                        }
+                        return '';
+                    }).filter(url => url.length > 0);
+                    
+                    let debugCard = null;
+                    if (cardIdx === 0) {
+                        debugCard = Array.from(card.querySelectorAll('*')).map(el => ({
+                            tag: el.tagName,
+                            className: el.className,
+                            text: el.textContent.trim().slice(0, 80)
+                        }));
+                    }
+
+                    return {
+                        name: nameEl ? nameEl.textContent.trim() : 'Usuário Anônimo',
+                        text: textEl ? textEl.textContent.trim() : '',
+                        rating,
+                        photo: imgEl ? (imgEl.src || '') : '',
+                        date: dateEl ? dateEl.textContent.trim() : '',
+                        reviewPhotos,
+                        debugCard
+                    };
+                });
+            });
+
+            // Adicionar ao Map
+            for (const r of chunkReviews) {
+                allExtractedReviews.set(r.name + '|||' + r.text, r);
+            }
+
+            // Aplicar os filtros configurados pelo usuário na lista acumulada
+            let reviews = Array.from(allExtractedReviews.values());
+            
+            if (onlyWithText) {
+                reviews = reviews.filter(r => r.text && r.text.trim().length > 0);
             }
             
+            if (minLength > 0) {
+                reviews = reviews.filter(r => r.text && r.text.trim().length >= minLength);
+            }
+            
+            if (ratingFilter !== 'all') {
+                if (ratingFilter === '4to5') {
+                    reviews = reviews.filter(r => r.rating >= 4);
+                } else if (ratingFilter === '3to5') {
+                    reviews = reviews.filter(r => r.rating >= 3);
+                } else if (ratingFilter === '2to5') {
+                    reviews = reviews.filter(r => r.rating >= 2);
+                } else if (ratingFilter === '1to5') {
+                    reviews = reviews.filter(r => r.rating >= 1);
+                } else {
+                    const targetRating = parseInt(ratingFilter, 10);
+                    reviews = reviews.filter(r => r.rating === targetRating);
+                }
+            }
+
+            // Aplicar filtro de palavras-chave (keywords)
+            if (keywords && keywords.trim().length > 0) {
+                const keywordList = keywords.split(',')
+                    .map(k => k.trim().toLowerCase())
+                    .filter(k => k.length > 0);
+                
+                if (keywordList.length > 0) {
+                    reviews = reviews.filter(r => {
+                        if (!r.text) return false;
+                        const textLower = r.text.toLowerCase();
+                        return keywordList.some(kw => textLower.includes(kw));
+                    });
+                }
+            }
+
+            const currentValidCount = reviews.length;
+            console.log(`[Scraper] Rolagem ${i}: Extraídos ${allExtractedReviews.size} únicos | Válidos no filtro = ${currentValidCount}`);
+
+            if (currentValidCount >= maxReviews) {
+                console.log(`[Scraper] Meta alcançada ou excedida (${currentValidCount} >= ${maxReviews}). Parando rolagens.`);
+                break;
+            }
+
+            if (allExtractedReviews.size === previousValidCount) {
+                noChangeCount++;
+                if (noChangeCount >= 4) {
+                    console.log("[Scraper] Sem novos depoimentos extraídos por 4 rolagens seguidas. Fim do feed virtual.");
+                    break;
+                }
+            } else {
+                noChangeCount = 0;
+                previousValidCount = allExtractedReviews.size;
+            }
+            
+            // Expandir textos truncados ANTES de rolar, para garantir que textos que saírem de tela sejam pegos expandidos
+            await page.evaluate(() => {
+                const moreButtons = Array.from(document.querySelectorAll('button, span, a')).filter(el => el.textContent.trim() === 'Mais');
+                for (const btn of moreButtons) {
+                    btn.click();
+                }
+            });
+            await new Promise(r => setTimeout(r, 500)); // Pequena pausa para expandir o dom
+
+            // Rolar a tela
             await page.evaluate(() => {
                 const scrollContainer = document.querySelector('div[role="feed"]') || 
                                          Array.from(document.querySelectorAll('div')).find(d => {
@@ -360,105 +557,12 @@ app.post('/api/scrape', async (req, res) => {
                 }
             });
             
-            await new Promise(r => setTimeout(r, 3000));
-            
-            const currentCount = await page.evaluate(() => document.querySelectorAll('.jftiEf').length);
-            console.log(`[Scraper] Rolagem ${i}: Depoimentos em tela = ${currentCount}`);
-            
-            if (currentCount === previousCount) {
-                noChangeCount++;
-                if (noChangeCount >= 3) {
-                    console.log("[Scraper] Sem novos depoimentos carregados por 3 rolagens seguidas. Fim do feed.");
-                    break;
-                }
-            } else {
-                noChangeCount = 0;
-                previousCount = currentCount;
-            }
+            await new Promise(r => setTimeout(r, 2500));
         }
-        
-        // Expandir todos os textos truncados ("Mais")
-        console.log("[Scraper] Expandindo depoimentos longos...");
-        await page.evaluate(() => {
-            const moreButtons = Array.from(document.querySelectorAll('button, span, a')).filter(el => el.textContent.trim() === 'Mais');
-            for (const btn of moreButtons) {
-                btn.click();
-            }
-        });
-        await new Promise(r => setTimeout(r, 1000));
-        
-        // Extrai os depoimentos com todos os detalhes (incluindo a data!)
-        console.log("[Scraper] Extraindo depoimentos estruturados...");
-        let reviews = await page.evaluate(() => {
-            const cards = document.querySelectorAll('.jftiEf');
-            return Array.from(cards).map((card, cardIdx) => {
-                const nameEl = card.querySelector('.d4r55');
-                const textEl = card.querySelector('.wiI7pd');
-                const ratingEl = card.querySelector('.kvMYJc');
-                const imgEl = card.querySelector('.NBa7we') || card.querySelector('img');
-                const dateEl = card.querySelector('.rsqaWe') || card.querySelector('.rsqaAc');
-                
-                let rating = 5;
-                if (ratingEl) {
-                    const label = ratingEl.getAttribute('aria-label') || '';
-                    const m = label.match(/\d+/);
-                    if (m) rating = parseInt(m[0], 10);
-                }
-                
-                const photoButtons = card.querySelectorAll('button.Tya61d');
-                const reviewPhotos = Array.from(photoButtons).map(btn => {
-                    const bg = window.getComputedStyle(btn).backgroundImage;
-                    if (bg && bg !== 'none') {
-                        let cleanUrl = bg.replace(/^url\(['"]?/, '').replace(/['"]?\)$/, '');
-                        const isGooglePhoto = /googleusercontent\.com|ggpht\.com|lh\d+\.google\.com/.test(cleanUrl);
-                        if (isGooglePhoto && cleanUrl.includes('=')) {
-                            const parts = cleanUrl.split('=');
-                            let param = parts[parts.length - 1];
-                            const segments = param.split('-');
-                            if (segments.length > 0 && (segments[0].match(/^(w|s)\d+$/) || segments[0] === 's0')) {
-                                const remaining = segments.filter(seg => {
-                                    if (seg.match(/^w\d+$/)) return false;
-                                    if (seg.match(/^h\d+$/)) return false;
-                                    if (seg === 'p' || seg === 'n') return false;
-                                    if (seg.match(/^s\d+$/)) return false;
-                                    return true;
-                                });
-                                param = ['s0', ...remaining].join('-');
-                                parts[parts.length - 1] = param;
-                                cleanUrl = parts.join('=');
-                            }
-                        }
-                        return cleanUrl;
-                    }
-                    return '';
-                }).filter(url => url.length > 0);
-                
-                let debugCard = null;
-                if (cardIdx === 0) {
-                    debugCard = Array.from(card.querySelectorAll('*')).map(el => ({
-                        tag: el.tagName,
-                        className: el.className,
-                        text: el.textContent.trim().slice(0, 80)
-                    }));
-                }
 
-                return {
-                    name: nameEl ? nameEl.textContent.trim() : 'Usuário Anônimo',
-                    text: textEl ? textEl.textContent.trim() : '',
-                    rating,
-                    photo: imgEl ? (imgEl.src || '') : '',
-                    date: dateEl ? dateEl.textContent.trim() : '',
-                    reviewPhotos,
-                    debugCard
-                };
-            });
-        });
-        
-        await browser.close();
-        
-        console.log(`[Scraper] Total bruto extraído: ${reviews.length}`);
-        
-        // Aplicar os filtros configurados pelo usuário
+        // Pega os válidos
+        let reviews = Array.from(allExtractedReviews.values());
+            
         if (onlyWithText) {
             reviews = reviews.filter(r => r.text && r.text.trim().length > 0);
         }
@@ -482,7 +586,6 @@ app.post('/api/scrape', async (req, res) => {
             }
         }
 
-        // Aplicar filtro de palavras-chave (keywords)
         if (keywords && keywords.trim().length > 0) {
             const keywordList = keywords.split(',')
                 .map(k => k.trim().toLowerCase())
@@ -496,6 +599,8 @@ app.post('/api/scrape', async (req, res) => {
                 });
             }
         }
+
+        await browser.close();
         
         // Limita ao número máximo solicitado
         const finalReviews = reviews.slice(0, maxReviews);
@@ -503,9 +608,7 @@ app.post('/api/scrape', async (req, res) => {
         console.log(`[Scraper] Total após filtros do servidor: ${finalReviews.length}`);
         
         if (finalReviews.length === 0) {
-            return res.status(404).json({
-                error: 'Nenhum depoimento encontrado com os filtros aplicados. Tente ajustar os filtros ou verificar a URL.'
-            });
+            throw new Error('Nenhum depoimento encontrado com os filtros aplicados. Tente ajustar os filtros ou verificar a URL.');
         }
         
         // Geração do resumo inteligente de IA local
@@ -520,18 +623,28 @@ app.post('/api/scrape', async (req, res) => {
             console.error('[Scraper] Erro ao gravar depoimentos.json:', writeErr.message);
         }
         
-        return res.json({
+        return {
             success: true,
             total: finalReviews.length,
             aiSummary,
             data: finalReviews
-        });
+        };
         
     } catch (error) {
         console.error("Erro no scraping desktop:", error);
         if (browser) await browser.close();
-        return res.status(500).json({
-            error: 'Erro ao tentar extrair dados da URL do Google Maps.',
+        throw error;
+    }
+}
+
+app.post('/api/scrape', async (req, res) => {
+    try {
+        const result = await runScraper(req.body);
+        return res.json(result);
+    } catch (error) {
+        console.error("Erro no endpoint scraping:", error);
+        return res.status(400).json({
+            error: error.message || 'Erro ao tentar extrair dados.',
             details: error.message
         });
     }
@@ -657,6 +770,8 @@ function generateLocalAiSummary(reviews) {
         highlights: highlights.slice(0, 3)
     };
 }
+
+scheduleCron();
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor rodando na porta ${PORT}`);

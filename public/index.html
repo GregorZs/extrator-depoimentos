@@ -174,8 +174,8 @@
                                 <div>
                                     <label for="reviewsSortOrder" class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Ordenação das Avaliações</label>
                                     <select id="reviewsSortOrder" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-300 font-medium focus:ring-1 focus:ring-brand-500 focus:outline-none">
-                                        <option value="most_relevant" selected>Mais Relevantes (Padrão)</option>
-                                        <option value="newest">Mais Recentes</option>
+                                        <option value="most_relevant">Mais Relevantes</option>
+                                        <option value="newest" selected>Mais Recentes (Padrão)</option>
                                     </select>
                                 </div>
 
@@ -245,7 +245,45 @@
                     </div>
                 </div>
 
-                <!-- 2. Interactive Widget Customizer Studio -->
+                <!-- 2. Automação de Atualização -->
+                <div class="bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-2xl p-5 shadow-xl">
+                    <h2 class="text-xs font-bold text-slate-300 uppercase tracking-widest mb-4 flex items-center justify-between border-b border-slate-800 pb-2">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-clock text-emerald-400"></i>
+                            <span>2. Automação (Cron)</span>
+                        </div>
+                        <label class="custom-switch" title="Ativar/Desativar Automação">
+                            <input type="checkbox" id="automationToggle">
+                            <span class="custom-switch-slider"></span>
+                        </label>
+                    </h2>
+                    
+                    <div id="automationPanel" class="space-y-4 transition-all opacity-50 pointer-events-none">
+                        <div>
+                            <label for="automationSchedule" class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Horário da Execução</label>
+                            <select id="automationSchedule" class="w-full bg-slate-950/80 border border-slate-800 rounded-lg px-2 py-2.5 text-xs text-slate-300 font-medium focus:ring-1 focus:ring-brand-500 focus:outline-none">
+                                <option value="0 0 * * *">Todo dia à 00:00 (Meia-noite)</option>
+                                <option value="0 6 * * *">Todo dia às 06:00 da manhã</option>
+                                <option value="0 12 * * *">Todo dia às 12:00 (Meio-dia)</option>
+                                <option value="0 18 * * *">Todo dia às 18:00 (Fim de tarde)</option>
+                                <option value="0 */12 * * *">A cada 12 horas</option>
+                                <option value="0 */6 * * *">A cada 6 horas</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex gap-2">
+                            <button type="button" id="btnSaveAutomation" class="flex-1 py-2 bg-emerald-600/80 hover:bg-emerald-500 text-white font-bold rounded-xl shadow transition-all text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-save"></i> Salvar
+                            </button>
+                            <button type="button" id="btnRunNow" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl shadow transition-all text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 border border-slate-700">
+                                <i class="fa-solid fa-play"></i> Agora
+                            </button>
+                        </div>
+                        <p id="automationStatusMsg" class="text-[9px] text-center text-slate-400 hidden mt-1"></p>
+                    </div>
+                </div>
+
+                <!-- 3. Interactive Widget Customizer Studio -->
                 <div class="bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-2xl p-5 shadow-xl relative overflow-hidden">
                     <h2 class="text-xs font-bold text-slate-300 uppercase tracking-widest mb-4 flex items-center gap-2 border-b border-slate-800 pb-2">
                         <i class="fa-solid fa-sliders text-brand-400"></i>
@@ -921,9 +959,10 @@
                                 <div class="sm:col-span-6 flex items-center space-x-2">
                                     <label for="curationSortSelect" class="text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">Ordenar:</label>
                                     <select id="curationSortSelect" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-[11px] text-slate-300 focus:outline-none">
-                                        <option value="original" selected>Ordem do Scrape (Padrão)</option>
-                                        <option value="stars-desc">Maior Nota ★★★★★</option>
-                                        <option value="stars-asc">Menor Nota ★☆☆☆☆</option>
+                                        <option value="original" selected>Mais Recentes p/ Antigos (Padrão)</option>
+                                        <option value="reverse">Mais Antigos p/ Recentes</option>
+                                        <option value="stars-desc">Maior Nota ⭐⭐⭐⭐⭐</option>
+                                        <option value="stars-asc">Menor Nota ⭐</option>
                                         <option value="text-desc">Mais Detalhados (Texto Longo)</option>
                                         <option value="text-asc">Mais Curtos</option>
                                         <option value="shuffle">Aleatório (Shuffle)</option>
