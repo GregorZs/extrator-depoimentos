@@ -232,6 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Results & Widget Output
     const resultsSection = document.getElementById('resultsSection');
     const tabEmbedBtn = document.getElementById('tabEmbedBtn');
+    const tabIframeBtn = document.getElementById('tabIframeBtn');
     const tabJsonBtn = document.getElementById('tabJsonBtn');
     const tabMarkdownBtn = document.getElementById('tabMarkdownBtn');
     const codeArea = document.getElementById('codeArea');
@@ -239,6 +240,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnExportCSV = document.getElementById('btnExportCSV');
     const btnDownloadWidget = document.getElementById('btnDownloadWidget');
     const historyList = document.getElementById('historyList');
+
+    // Workspace tabs layout selectors
+    const workspaceTabsCard = document.getElementById('workspaceTabsCard');
+    const tabWsEmbed = document.getElementById('tabWsEmbed');
+    const tabWsCuration = document.getElementById('tabWsCuration');
+    const tabWsAnalytics = document.getElementById('tabWsAnalytics');
+    const wsCurationBadge = document.getElementById('wsCurationBadge');
 
     // -------------------------------------------------------------
     // Core Application State Variables
@@ -254,15 +262,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let filterPhotoOnly = false;
 
     // Configurator state
-    let widgetTheme = 'dark'; // 'dark' | 'light'
+    let widgetTheme = 'light'; // 'dark' | 'light'
     let widgetBgType = 'solid'; // 'solid' | 'transparent'
     let widgetAccentColor = '#0ea5e9';
-    let widgetTemplate = 'grid'; // 'grid' | 'slide' | 'masonry' | 'list' | 'badge' | 'floating'
+    let widgetTemplate = 'slide'; // 'grid' | 'slide' | 'masonry' | 'list' | 'badge' | 'floating'
     let widgetCols = '3';
     
     // Carousel options
     let widgetSliderStyle = 'multi'; // 'multi' | 'center' | 'single'
-    let widgetSliderArrows = 'side-overlay'; // 'side-overlay' | 'top-right' | 'none'
+    let widgetSliderArrows = 'top-right'; // 'side-overlay' | 'top-right' | 'none'
     let widgetSliderBullets = 'off'; // 'on' | 'off'
     let widgetSliderScrollbar = 'on'; // 'on' | 'off'
     let widgetSliderLoop = 'on'; // 'on' | 'off'
@@ -290,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let showGoogleLogo = true;
 
     // Header Customizer state
-    let showHeader = true;
+    let showHeader = false;
     let headerTitle = "O que nossos clientes dizem";
     let showHeaderRating = true;
     let showHeaderButton = true;
@@ -555,6 +563,30 @@ document.addEventListener('DOMContentLoaded', () => {
         renderHistory();
     }
 
+    // Carrega depoimentos.json local se existir, caso contrário inicia com mock
+    async function loadLocalDepoimentos() {
+        try {
+            console.log('[Frontend] Carregando depoimentos.json local...');
+            const response = await fetch('/depoimentos.json');
+            if (response.ok) {
+                const data = await response.json();
+                if (data && data.length > 0) {
+                    console.log(`[Frontend] ${data.length} depoimentos carregados do depoimentos.json local.`);
+                    // O resumo da IA é recalculado dinamicamente com base nos dados reais
+                    const localAiSummary = generateLocalAiSummary(data);
+                    loadData(data, localAiSummary, "Depoimentos do Google Maps");
+                    return;
+                }
+            }
+        } catch (e) {
+            console.warn('[Frontend] Falha ao carregar depoimentos.json:', e.message);
+        }
+        
+        // Fallback para dados de simulação/mock caso o arquivo json local não exista ou falhe
+        console.log('[Frontend] Usando dados simulados por padrão.');
+        loadData(mockReviews, mockAiSummary, "Bella Vista Gastronomia Local");
+    }
+
     function savePreferences() {
         localStorage.setItem('extractor_accentColor', widgetAccentColor);
         localStorage.setItem('extractor_theme', widgetTheme);
@@ -594,6 +626,38 @@ document.addEventListener('DOMContentLoaded', () => {
     tabDesignBtn.addEventListener('click', () => setCustomizerPanel('design', tabDesignBtn));
     tabElementsBtn.addEventListener('click', () => setCustomizerPanel('elements', tabElementsBtn));
     tabManualBtn.addEventListener('click', () => setCustomizerPanel('manual', tabManualBtn));
+
+    // Workspace tabs switching logic
+    let activeWorkspaceTab = 'embed'; // default active tab
+
+    function setWorkspaceTab(tabName) {
+        activeWorkspaceTab = tabName;
+        
+        const tabs = [
+            { btn: tabWsEmbed, panel: resultsSection, name: 'embed' },
+            { btn: tabWsCuration, panel: curationCard, name: 'curation' },
+            { btn: tabWsAnalytics, panel: analyticsCard, name: 'analytics' }
+        ];
+
+        tabs.forEach(t => {
+            if (t.name === tabName) {
+                // Active button styles
+                t.btn.className = "px-3.5 py-1.5 rounded-lg text-[10px] font-bold bg-brand-500 text-white shadow-sm flex items-center gap-1.5 focus:outline-none transition-all ws-tab-btn active";
+                // Show panel
+                t.panel.style.display = 'block';
+                t.panel.classList.remove('hidden');
+            } else {
+                // Inactive button styles
+                t.btn.className = "px-3.5 py-1.5 rounded-lg text-[10px] font-bold text-slate-400 hover:text-slate-200 flex items-center gap-1.5 focus:outline-none transition-all ws-tab-btn";
+                // Hide panel
+                t.panel.style.display = 'none';
+            }
+        });
+    }
+
+    tabWsEmbed.addEventListener('click', () => setWorkspaceTab('embed'));
+    tabWsCuration.addEventListener('click', () => setWorkspaceTab('curation'));
+    tabWsAnalytics.addEventListener('click', () => setWorkspaceTab('analytics'));
 
     // Device Responsive Simulator Controls
     function setSimulatorDevice(device) {
@@ -1000,8 +1064,8 @@ document.addEventListener('DOMContentLoaded', () => {
         manualReviewForm.reset();
 
         errorMessage.classList.add('hidden');
-        resultsSection.classList.remove('hidden');
-        curationCard.classList.remove('hidden');
+        workspaceTabsCard.classList.remove('hidden');
+        setWorkspaceTab('embed');
 
         renderCurationList();
         renderReviewsGrid();
@@ -1020,6 +1084,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function loadData(reviews, aiSummary, placeName = "Estabelecimento Scrape") {
+        // FILTRO SIMPLES DE NOTAS:
+        // Mude esta variável para 'true' para exibir apenas depoimentos com nota 5.
+        // Mude para 'false' para exibir todas as avaliações.
+        const filterOnly5Stars = false;
+        if (filterOnly5Stars && reviews && reviews.length > 0) {
+            reviews = reviews.filter(r => r.rating === 5);
+            if (aiSummary) {
+                aiSummary.averageRating = "5.0";
+                aiSummary.totalAnalyzed = reviews.length;
+            }
+        }
+
         // Clean Google review photo URLs to full-size original resolution
         if (reviews && reviews.length > 0) {
             reviews.forEach(r => {
@@ -1075,8 +1151,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }));
 
         errorMessage.classList.add('hidden');
-        resultsSection.classList.remove('hidden');
-        curationCard.classList.remove('hidden');
+        workspaceTabsCard.classList.remove('hidden');
+        setWorkspaceTab('embed');
 
         // Draw curation items list UI
         renderCurationList();
@@ -1145,8 +1221,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setScraperLoading(true);
         errorMessage.classList.add('hidden');
-        resultsSection.classList.add('hidden');
-        curationCard.classList.add('hidden');
+        workspaceTabsCard.classList.add('hidden');
         reviewsPreviewWrapper.innerHTML = '';
         startProgressLogs();
 
@@ -2958,12 +3033,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // -------------------------------------------------------------
     function setTab(tab) {
         activeCodeTab = tab;
-        [tabEmbedBtn, tabJsonBtn, tabMarkdownBtn].forEach(btn => {
-            btn.className = "px-3 py-2 text-[11px] font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 focus:outline-none whitespace-nowrap flex items-center gap-1";
+        [tabEmbedBtn, tabIframeBtn, tabJsonBtn, tabMarkdownBtn].forEach(btn => {
+            if (btn) {
+                btn.className = "px-3 py-2 text-[11px] font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 focus:outline-none whitespace-nowrap flex items-center gap-1";
+            }
         });
 
         if (tab === 'embed') {
             tabEmbedBtn.className = "px-3 py-2 text-[11px] font-bold border-b-2 border-brand-500 text-brand-400 focus:outline-none whitespace-nowrap flex items-center gap-1";
+        } else if (tab === 'iframe') {
+            tabIframeBtn.className = "px-3 py-2 text-[11px] font-bold border-b-2 border-brand-500 text-brand-400 focus:outline-none whitespace-nowrap flex items-center gap-1";
         } else if (tab === 'json') {
             tabJsonBtn.className = "px-3 py-2 text-[11px] font-bold border-b-2 border-brand-500 text-brand-400 focus:outline-none whitespace-nowrap flex items-center gap-1";
         } else if (tab === 'markdown') {
@@ -2973,6 +3052,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     tabEmbedBtn.addEventListener('click', () => setTab('embed'));
+    if (tabIframeBtn) tabIframeBtn.addEventListener('click', () => setTab('iframe'));
     tabJsonBtn.addEventListener('click', () => setTab('json'));
     tabMarkdownBtn.addEventListener('click', () => setTab('markdown'));
 
@@ -3253,6 +3333,45 @@ ${css}
 <\/script>`;
 
             codeArea.textContent = templateCode;
+        } else if (activeCodeTab === 'iframe') {
+            const domain = window.location.origin;
+            const params = new URLSearchParams();
+            
+            params.set('theme', widgetTheme);
+            params.set('bg', widgetBgType);
+            params.set('accent', widgetAccentColor.replace('#', ''));
+            params.set('template', widgetTemplate);
+            params.set('cols', widgetCols);
+            params.set('limit', activeReviews.length);
+            
+            const starsStr = Array.from(activeStarsFilters).join(',');
+            params.set('stars', starsStr === '1,2,3,4,5' ? 'all' : starsStr);
+            
+            params.set('onlyWithText', filterTextOnly);
+            params.set('avatars', showAvatars);
+            params.set('dates', showDates);
+            params.set('googleLogo', showGoogleLogo);
+            params.set('photos', showPhotos);
+            params.set('aiSummary', showAiSummary);
+            params.set('sliderStyle', widgetSliderStyle);
+            params.set('sliderArrows', widgetSliderArrows);
+            params.set('sliderBullets', widgetSliderBullets);
+            params.set('sliderScrollbar', widgetSliderScrollbar);
+            params.set('sliderLoop', widgetSliderLoop === 'on');
+            params.set('autoplay', widgetAutoPlay === 'on');
+            params.set('autoplaySpeed', widgetAutoPlaySpeed);
+            params.set('gap', widgetGap);
+            params.set('borderRadius', widgetBorderRadius);
+            params.set('hover', widgetHoverEffect);
+            params.set('shadow', widgetShadowStyle);
+            params.set('clamp', widgetTextClamp === 'clamp');
+            params.set('textLimit', widgetTextLengthLimit);
+
+            const iframeUrl = `${domain}/widget.html?${params.toString()}`;
+            const iframeCode = `<!-- Widget de Depoimentos do Google com Atualização Automática -->
+<iframe src="${iframeUrl}" style="width: 100%; min-height: 550px; border: none;" allowtransparency="true"></iframe>`;
+
+            codeArea.textContent = iframeCode;
         } else if (activeCodeTab === 'json') {
             codeArea.textContent = JSON.stringify(activeReviews, null, 2);
         } else if (activeCodeTab === 'markdown') {
@@ -3618,4 +3737,5 @@ ${css}
     // Application Startups
     // -------------------------------------------------------------
     loadSavedPreferences();
+    loadLocalDepoimentos();
 });

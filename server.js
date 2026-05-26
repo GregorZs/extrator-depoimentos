@@ -20,16 +20,39 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Rota para servir o arquivo depoimentos.json da raiz do projeto
+app.get('/depoimentos.json', (req, res) => {
+    const filePath = path.join(__dirname, 'depoimentos.json');
+    if (fs.existsSync(filePath)) {
+        res.sendFile(filePath);
+    } else {
+        res.status(404).json({ error: 'Arquivo depoimentos.json não encontrado.' });
+    }
+});
+
 app.post('/api/scrape', async (req, res) => {
     const { url, maxReviews = 10, ratingFilter = 'all', onlyWithText = false, minLength = 0, keywords = '', sortBy = 'most_relevant' } = req.body;
 
-    if (!url || !url.includes('google.com/maps')) {
-        return res.status(400).json({ error: 'Por favor, forneça uma URL válida do Google Maps.' });
+    if (!url) {
+        return res.status(400).json({ error: 'Por favor, forneça uma URL do Google Maps ou o nome da empresa.' });
+    }
+
+    let targetUrl = url.trim();
+    const isUrl = targetUrl.startsWith('http://') || targetUrl.startsWith('https://');
+
+    if (isUrl) {
+        if (!targetUrl.includes('google.com/maps') && !targetUrl.includes('maps.app.goo.gl') && !targetUrl.includes('google.com/local')) {
+            return res.status(400).json({ error: 'Por favor, forneça uma URL válida do Google Maps.' });
+        }
+    } else {
+        // Se não for uma URL, assume ser o nome da empresa
+        targetUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(targetUrl)}`;
+        console.log(`[Scraper] Busca por nome de empresa convertida para URL: ${targetUrl}`);
     }
 
     let browser;
     try {
-        console.log(`[Scraper] Iniciando extração para: ${url} (max: ${maxReviews}, filter: ${ratingFilter}, onlyText: ${onlyWithText})`);
+        console.log(`[Scraper] Iniciando extração para: ${targetUrl} (max: ${maxReviews}, filter: ${ratingFilter}, onlyText: ${onlyWithText})`);
         
         let options = {};
 
@@ -111,8 +134,29 @@ app.post('/api/scrape', async (req, res) => {
         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
         
         console.log("[Scraper] Navegando para URL...");
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 5000));
+        await page.goto(targetUrl, { waitUntil: 'networkidle2', timeout: 60000 });
+        await new Promise(r => setTimeout(r, 6000));
+
+        // Se for uma página de múltiplos resultados de pesquisa, clica no primeiro item
+        console.log("[Scraper] Verificando se é uma listagem de resultados...");
+        const clickedFirst = await page.evaluate(() => {
+            const firstResult = document.querySelector('a.hfpxzc') || 
+                                document.querySelector('a[href*="/maps/place/"]') ||
+                                document.querySelector('[class*="place-result-container"] a') ||
+                                Array.from(document.querySelectorAll('a')).find(a => a.href && a.href.includes('/maps/place/'));
+            if (firstResult) {
+                firstResult.click();
+                return true;
+            }
+            return false;
+        });
+
+        if (clickedFirst) {
+            console.log("[Scraper] Lista de resultados encontrada. Primeiro item clicado. Aguardando 6s para carregar detalhes...");
+            await new Promise(r => setTimeout(r, 6000));
+        } else {
+            console.log("[Scraper] Entrada direta ou redirecionamento automático para o estabelecimento.");
+        }
         
         // Let's resolve the page and click the "Avaliações" or "Reviews" tab.
         // We will try to click it on the current resolved page. If not found, we use robust search queries.
@@ -224,21 +268,57 @@ app.post('/api/scrape', async (req, res) => {
         // Ordenação por "Mais Recentes" se solicitado
         if (sortBy === 'newest') {
             console.log("[Scraper] Tentando ordenar por Mais Recentes...");
+            
+            // Aguarda o botão de ordenação aparecer na página (até 8 segundos)
+            let sortBtnVisible = false;
+            for (let i = 0; i < 16; i++) {
+                sortBtnVisible = await page.evaluate(() => {
+                    const sortBtn = Array.from(document.querySelectorAll('button')).find(b => {
+                        const txt = b.textContent.trim().toLowerCase();
+                        const aria = (b.getAttribute('aria-label') || '').toLowerCase();
+                        return txt.includes('ordenar') || txt.includes('sort') || txt.includes('trier') || txt.includes('sortieren') || txt.includes('ordina') ||
+                               aria.includes('ordenar') || aria.includes('sort') || aria.includes('trier') || aria.includes('sortieren') || aria.includes('ordina');
+                    });
+                    return !!sortBtn;
+                });
+                if (sortBtnVisible) break;
+                await new Promise(r => setTimeout(r, 500));
+            }
+            console.log(`[Scraper] Botão de ordenação visível no DOM? ${sortBtnVisible ? 'Sim' : 'Não'}`);
+
             const sorted = await page.evaluate(async () => {
                 const sortBtn = Array.from(document.querySelectorAll('button')).find(b => {
                     const txt = b.textContent.trim().toLowerCase();
-                    return txt.includes('ordenar') || txt.includes('sort') || b.getAttribute('aria-label')?.toLowerCase().includes('ordenar');
+                    const aria = (b.getAttribute('aria-label') || '').toLowerCase();
+                    return txt.includes('ordenar') || txt.includes('sort') || txt.includes('trier') || txt.includes('sortieren') || txt.includes('ordina') ||
+                           aria.includes('ordenar') || aria.includes('sort') || aria.includes('trier') || aria.includes('sortieren') || aria.includes('ordina');
                 });
                 
                 if (!sortBtn) return false;
                 sortBtn.click();
                 
-                await new Promise(r => setTimeout(r, 1500));
+                // Aguarda o menu dropdown de ordenação abrir (até 3 segundos)
+                let menuContainer = null;
+                for (let i = 0; i < 30; i++) {
+                    menuContainer = document.querySelector('div[role="menu"]');
+                    if (menuContainer) break;
+                    await new Promise(r => setTimeout(r, 100));
+                }
                 
-                const menuItems = Array.from(document.querySelectorAll('div[role="menuitem"], div[role="menuitemradio"], button, span, a'));
+                if (!menuContainer) {
+                    menuContainer = document.body;
+                }
+                
+                // Busca o item de ordenação por data usando termos internacionalizados
+                const menuItems = Array.from(menuContainer.querySelectorAll('div[role="menuitem"], div[role="menuitemradio"], button, span, a'));
                 const recentItem = menuItems.find(el => {
                     const txt = el.textContent.trim().toLowerCase();
-                    return txt === 'mais recentes' || txt === 'newest' || txt.includes('recentes');
+                    const jsaction = el.getAttribute('jsaction') || '';
+                    
+                    // Descartar botões da barra lateral de navegação principal caso tenha caído no body
+                    if (jsaction.includes('navigationrail')) return false;
+                    
+                    return txt.includes('recent') || txt.includes('newest') || txt.includes('neueste') || txt.includes('récent') || txt.includes('reciente');
                 });
                 
                 if (recentItem) {
@@ -249,7 +329,7 @@ app.post('/api/scrape', async (req, res) => {
             });
             console.log(`[Scraper] Ordenação por mais recentes aplicada? ${sorted ? 'Sim' : 'Não'}`);
             if (sorted) {
-                await new Promise(r => setTimeout(r, 4000));
+                await new Promise(r => setTimeout(r, 4500));
             }
         }
         
@@ -430,6 +510,15 @@ app.post('/api/scrape', async (req, res) => {
         
         // Geração do resumo inteligente de IA local
         const aiSummary = generateLocalAiSummary(finalReviews);
+        
+        // Salva os depoimentos em depoimentos.json na raiz do projeto
+        try {
+            const depoimentosPath = path.join(__dirname, 'depoimentos.json');
+            fs.writeFileSync(depoimentosPath, JSON.stringify(finalReviews, null, 2), 'utf-8');
+            console.log(`[Scraper] Depoimentos salvos com sucesso em ${depoimentosPath}`);
+        } catch (writeErr) {
+            console.error('[Scraper] Erro ao gravar depoimentos.json:', writeErr.message);
+        }
         
         return res.json({
             success: true,
